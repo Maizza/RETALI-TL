@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,23 +10,36 @@ class Kloter extends Model
     use HasFactory;
 
     protected $table = 'kloters';
+
     protected $fillable = ['nama', 'tanggal'];
+
+    protected $appends = ['tanggal_label', 'name'];
 
     public function tourleaders()
     {
-        return $this->hasMany(Tourleader::class, 'kloter_id');
+        return $this->hasMany(TourLeader::class, 'kloter_id');
     }
 
-    // ✅ alias 'name' -> pakai kolom 'nama' kalau ada
-    protected $appends = ['name'];
     public function getNameAttribute(): string
     {
-        return $this->attributes['nama']
-            ?? $this->attributes['name']
-            ?? ('Kloter #'.$this->attributes['id']);
+        return $this->nama ?? ('Kloter #' . $this->id);
     }
-    public function checklistTasks() {
-    return $this->belongsToMany(ChecklistTask::class, 'checklist_task_kloter', 'kloter_id', 'checklist_task_id');
-}
 
+    /**
+     * INI KUNCI UTAMA
+     * Semua logika tanggal DISINI
+     */
+    public function getTanggalLabelAttribute(): string
+    {
+        if (!$this->tanggal) {
+            return '-';
+        }
+
+        // Normalisasi spasi & strip
+        $text = trim($this->tanggal);
+
+        // Kalau format sudah rapi → langsung tampilkan
+        // contoh: "10 januari - 25 januari 2026"
+        return $text;
+    }
 }

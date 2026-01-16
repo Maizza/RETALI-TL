@@ -19,18 +19,18 @@ class ScansExport implements FromView
 
     public function view(): View
     {
-        $query = Scan::with('user')->latest();
+        $query = Scan::with('tourleader')->latest('scanned_at');
 
         if ($this->tourleader) {
-            $query->where('user_id', $this->tourleader);
+            $query->where('tourleader_id', $this->tourleader);
         }
 
         if ($this->date) {
             $query->whereDate('scanned_at', $this->date);
         }
 
-        $scans = $query->get();
-
-        return view('admin.scans.export', compact('scans'));
+        return view('admin.scans.export', [
+            'scans' => $query->get()
+        ]);
     }
 }

@@ -246,34 +246,44 @@ class ItineraryController extends Controller
         return view('admin.itinerary.show', compact('itinerary'));
     }
 
-    public function edit(Itinerary $itinerary)
-    {
-        $tourLeaders = TourLeader::orderBy('name')->get();
-        return view('admin.itinerary.edit', compact('itinerary', 'tourLeaders'));
-    }
+   public function edit(Itinerary $itinerary)
+{
+    $itinerary->load('tourLeaders', 'days.items');
+    $tourLeaders = TourLeader::orderBy('name')->get();
+    $cities = City::orderBy('name')->get(); // ⬅️ ambil kota
 
-    public function update(Request $request, Itinerary $itinerary)
-    {
-        $data = $request->validate([
-            'title'        => 'required|string|max:150',
-            'start_date'   => 'nullable|date',
-            'end_date'     => 'nullable|date|after_or_equal:start_date',
-            'tourleaders'  => 'array',
-            'tourleaders.*'=> 'exists:tour_leaders,id',
+    return view(
+        'admin.itinerary.edit',
+        compact('itinerary', 'tourLeaders', 'cities')
+    );
+}
+
+public function update(Request $request, Itinerary $itinerary)
+{
+    $data = $request->validate([
+        'title'         => 'required|string|max:150',
+        'start_date'    => 'nullable|date',
+        'end_date'      => 'nullable|date|after_or_equal:start_date',
+        'tourleaders'   => 'required|array|min:1',
+        'tourleaders.*' => 'exists:tour_leaders,id',
+    ]);
+
+    DB::transaction(function () use ($itinerary, $data) {
+
+        $itinerary->update([
+            'title'      => $data['title'],
+            'start_date' => $data['start_date'] ?? null,
+            'end_date'   => $data['end_date'] ?? null,
         ]);
 
-        DB::transaction(function () use ($itinerary, $data) {
-            $itinerary->update([
-                'title'      => $data['title'],
-                'start_date' => $data['start_date'] ?? null,
-                'end_date'   => $data['end_date'] ?? null,
-            ]);
+        // SYNC CHECKBOX TL
+        $itinerary->tourLeaders()->sync($data['tourleaders']);
+    });
 
-            $itinerary->tourLeaders()->sync($data['tourleaders'] ?? []);
-        });
+    return redirect()
+        ->route('admin.itinerary.edit', $itinerary)
+        ->with('ok', 'Itinerary & Tour Leader berhasil diperbarui.');
+}
 
-        return redirect()
-            ->route('admin.itinerary.show', $itinerary)
-            ->with('ok', 'Itinerary berhasil diperbarui.');
-    }
+
 }

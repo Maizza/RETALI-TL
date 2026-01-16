@@ -55,6 +55,8 @@
                   <th>Nama Petugas</th>
                   <th>Kloter</th>
                   <th style="width:160px">Status</th>
+                  <th style="width:120px">Aksi</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -64,7 +66,18 @@
                     <td>{{ $sub->tourleader->name ?? '-' }}</td>
                     <td>{{ $sub->nama_petugas }}</td>
                     <td>{{ $sub->kloter }}</td>
-                    <td><span class="badge bg-success">Sudah dikerjakan</span></td>
+                    <td>
+                      <span class="badge bg-success">Sudah dikerjakan</span>
+                    </td>
+                    <td>
+                      <a href="{{ route('admin.ceklis.hasil.detail', [
+                            'task' => $task->id,
+                            'submission' => $sub->id
+                        ]) }}"
+                        class="btn btn-sm btn-outline-primary">
+                        Lihat Hasil
+                      </a>
+                    </td>
                   </tr>
                 @empty
                   <tr>

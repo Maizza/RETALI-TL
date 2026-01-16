@@ -2,97 +2,115 @@
 
 namespace App\Http\Controllers;
 
-use Google\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\Notification;
 use Google\Client as GoogleClient;
 
 class NotificationController extends Controller
 {
-    private $projectId;
-    private $credentialsPath;
+    private string $projectId;
+    private string $credentialsPath;
 
     public function __construct()
     {
-        $this->projectId = "retali-project"; // ganti sesuai project_id FCM
+        // GANTI sesuai project_id Firebase kamu
+        $this->projectId = 'retali-project';
+
+        // Path service account JSON Firebase
         $this->credentialsPath = storage_path('app/firebase/retali-project-firebase.json');
     }
 
-    private function getAccessToken()
-{
-    $client = new GoogleClient();
-    $client->setAuthConfig(storage_path('app/firebase/retali-project-firebase.json'));
-    $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
-    $client->refreshTokenWithAssertion();
-    $token = $client->getAccessToken();
-    return $token['access_token'];
-}
+    /**
+     * Ambil OAuth2 Access Token untuk Firebase Cloud Messaging v1
+     */
+    private function getAccessToken(): string
+    {
+        $client = new GoogleClient();
+        $client->setAuthConfig($this->credentialsPath);
+        $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+        $client->refreshTokenWithAssertion();
 
-    // Tampilkan semua notifikasi
+        $token = $client->getAccessToken();
+
+        return $token['access_token'];
+    }
+
+    /**
+     * List notifikasi (Admin)
+     */
     public function index()
     {
         $notifications = Notification::latest()->get();
         return view('admin.notifications.index', compact('notifications'));
     }
 
-    // Tampilkan form buat notifikasi baru
+    /**
+     * Form buat notifikasi
+     */
     public function create()
     {
         return view('admin.notifications.create');
     }
 
-    // simpan notifikasi dan kirim FCM
+    /**
+     * Simpan notifikasi & kirim ke FCM
+     */
     public function sendNotification(Request $request)
     {
         $request->validate([
+            'title'     => 'required|string',
+            'message'   => 'required|string',
             'fcm_token' => 'nullable|string',
-            'title' => 'required|string',
-            'message' => 'required|string',
         ]);
 
-        // simpan ke database
+        // 1️⃣ Simpan ke database
         $notification = Notification::create([
-            'title' => $request->title,
-            'message' => $request->message,
+            'title'     => $request->title,
+            'message'   => $request->message,
             'is_active' => true,
         ]);
 
-        // kirim ke FCM kalau ada token
-        if ($request->fcm_token) {
-            $fcmToken = $request->fcm_token;
+        // 2️⃣ Tentukan target
+        // Jika ada token → kirim ke 1 device
+        // Jika kosong → broadcast ke topic "all"
+        $target = $request->filled('fcm_token')
+            ? ['token' => $request->fcm_token]
+            : ['topic' => 'all'];
 
-            $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
-
-            $message = [
-    "message" => [
-        "token" => $fcmToken,
-        "notification" => [
-            "title" => $request->title,
-            "body" => $request->message,
+        // 3️⃣ Payload FCM (WAJIB ada "notification")
+        $payload = [
+    'message' => array_merge($target, [
+        'data' => [                         // ✅ DATA ONLY
+            'title' => $request->title,
+            'body'  => $request->message,
+            'type'  => 'general',
+            'notification_id' => (string) $notification->id,
         ],
-        "android" => [
-            "priority" => "high",
-            "notification" => [
-                "sound" => "default",
-                "channel_id" => "default_channel"
-            ]
+        'android' => [
+            'priority' => 'high',
         ],
-        "apns" => [
-            "payload" => [
-                "aps" => [
-                    "sound" => "default",
-                    "content-available" => 1
-                ]
-            ]
-        ]
-    ],
+    ]),
 ];
 
-            $response = Http::withToken($this->getAccessToken())
-                ->post($url, $message);
+
+        // 4️⃣ Kirim ke Firebase
+        $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
+
+        $response = Http::withToken($this->getAccessToken())
+            ->withHeader('Content-Type', 'application/json')
+            ->post($url, $payload);
+
+        // (opsional) logging jika error
+        if ($response->failed()) {
+            \Log::error('FCM ERROR', [
+                'response' => $response->body(),
+            ]);
         }
 
-        return redirect()->back()->with('success', 'Notifikasi berhasil dibuat!');
+        return redirect()
+            ->back()
+            ->with('success', 'Notifikasi berhasil dikirim');
     }
 }

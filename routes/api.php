@@ -13,9 +13,13 @@ use App\Http\Controllers\Api\TaskApiController;
 use App\Http\Controllers\Api\ChecklistTaskApiController;
 use App\Http\Controllers\Api\ChecklistSubmitController;
 use App\Http\Controllers\Api\ItineraryApiController;
+use App\Http\Controllers\Api\PassportScanController;
+use App\Http\Controllers\Api\MuthawifApiController;
+
 
 // **ABSEN JAMAAH**
-use App\Http\Controllers\Api\TourLeaderAbsensiController;
+use App\Http\Controllers\Api\AttendanceJamaahController;
+
 
 // **ABSEN TOURLEADER**
 use App\Http\Controllers\Api\AttendanceController;
@@ -43,6 +47,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/scans', [ScanController::class, 'index']);
     Route::post('/scans', [ScanController::class, 'store']);
 
+     // ==================================================
+    // SCAN PASPOR (GLOBAL – 1 PASPOR = 1 SCAN)
+    // ==================================================
+    Route::post('/passport-scan', [PassportScanController::class, 'store']);
+
+    Route::post(
+    '/tourleader/passport-scan',
+    [PassportScanController::class, 'store'] );
+
+
+
     // FCM
     Route::post('/save-fcm-token', function (Request $request) {
         $data = $request->validate([
@@ -68,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/itinerary/{itinerary}/days/{dayNumber}', [ItineraryApiController::class, 'fillDay']);
     Route::delete('/itinerary/{itinerary}', [ItineraryApiController::class, 'destroy']);
 
-    // ABSENSI TOUR LEADER (ABSEN KERJA TL)  
+    // ABSENSI TOUR LEADER (ABSEN KERJA TL)
     Route::post('/attendance', [AttendanceController::class, 'store']);
     Route::get('/attendance', [AttendanceController::class, 'myHistory']);
 });
@@ -79,9 +94,8 @@ Route::middleware('auth:sanctum')->group(function () {
 // ======================================================
 Route::post('/tourleader/login', [TourLeaderController::class, 'login']);
 
-Route::middleware('auth:tourleader')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
 
-    // PROFIL TL
     Route::get('/tourleader/profile', [TourLeaderController::class, 'profile']);
 
     // SCAN
@@ -97,6 +111,29 @@ Route::middleware('auth:tourleader')->group(function () {
     Route::get('/tourleader/tasks/{task}', [TaskApiController::class, 'show']);
     Route::post('/tourleader/tasks/{task}/done', [TaskApiController::class, 'markDone']);
 
+    // ===============================
+// TASK TL - PER SOAL (WAJIB)
+// ===============================
+
+// Ambil status per soal (Sudah / Belum)
+Route::get(
+    '/tourleader/tasks/{task}/answers',
+    [TaskApiController::class, 'answers']
+);
+
+// Tandai soal = Sudah
+Route::post(
+    '/tourleader/tasks/{task}/questions/{question}/answer',
+    [TaskApiController::class, 'answer']
+);
+
+// Tandai soal = Belum
+Route::delete(
+    '/tourleader/tasks/{task}/questions/{question}/answer',
+    [TaskApiController::class, 'unanswer']
+);
+
+
     // CHECKLIST TL
     Route::get('/tourleader/checklist', [ChecklistTaskApiController::class, 'index']);
     Route::get('/tourleader/checklist/{task}', [ChecklistTaskApiController::class, 'show']);
@@ -106,15 +143,27 @@ Route::middleware('auth:tourleader')->group(function () {
     Route::get('/tourleader/itinerary', [ItineraryApiController::class, 'tlList']);
     Route::get('/tourleader/itinerary/{itinerary}', [ItineraryApiController::class, 'tlShow']);
 
+     // ======================================================
+// ABSENSI JAMAAH - PER JAMAAH (STATUS + CATATAN)
+// ======================================================
 
+// LIST ABSEN (HOME)
+Route::get(
+    '/tourleader/attendance-jamaah',
+    [AttendanceJamaahController::class, 'index']
+);
 
-    // ======================================================
-    // ===============  ABSENSI JAMAAH (FLOW BARU) =========
-    // ======================================================
-    Route::get('/tourleader/absensi', [TourLeaderAbsensiController::class, 'index']);
-    Route::get('/tourleader/absensi/{id}', [TourLeaderAbsensiController::class, 'show']);
-    Route::post('/tourleader/absensi/submit', [TourLeaderAbsensiController::class, 'submit']);
+// DETAIL ABSEN + LIST JAMAAH  ⬅️ WAJIB ADA
+Route::get(
+    '/tourleader/attendance-jamaah/{id}',
+    [AttendanceJamaahController::class, 'show']
+);
 
+// UPDATE STATUS + CATATAN
+Route::post(
+    '/tourleader/attendance-jamaah',
+    [AttendanceJamaahController::class, 'update']
+);
 
     // ======================================================
     // ========== ABSENSI TOUR LEADER (ABSEN DIRI SENDIRI) ==
@@ -123,4 +172,17 @@ Route::middleware('auth:tourleader')->group(function () {
     Route::post('/tourleader/attendance', [AttendanceController::class, 'store']);  // <= WAJIB ADA
     Route::get('/tourleader/attendance', [AttendanceController::class, 'myHistory']);
 
+
+
+    //MUTHAWIF
+
+    Route::prefix('muthawif')->group(function () {
+    Route::post('/login', [MuthawifApiController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/profile', [MuthawifApiController::class, 'profile']);
+        Route::post('/logout', [MuthawifApiController::class, 'logout']);
+    });
+
+});
 });

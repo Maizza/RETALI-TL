@@ -11,23 +11,24 @@ return new class extends Migration {
     public function up(): void
 {
     Schema::create('scans', function (Blueprint $table) {
-        $table->id();
-        $table->string('koper_code');
-        $table->string('owner_name')->nullable();
-        $table->string('owner_phone', 30)->nullable();
+    $table->id();
 
-        // UBAH INI: tambahkan ->nullable()
-        $table->foreignId('tourleader_id')
-              ->nullable()  // ← TAMBAHKAN INI
-              ->constrained('tour_leaders')
-              ->cascadeOnDelete();
+    // KODE KOPER HARUS UNIK GLOBAL
+    $table->string('koper_code')->unique();
 
-        $table->string('kloter')->nullable();
-        $table->timestamp('scanned_at')->useCurrent();
-        $table->timestamps();
+    $table->string('owner_name')->nullable();
+    $table->string('owner_phone', 30)->nullable();
 
-        $table->index('koper_code');
-    });
+    $table->foreignId('tourleader_id')
+          ->nullable()
+          ->constrained('tour_leaders')
+          ->cascadeOnDelete();
+
+    $table->string('kloter')->nullable();
+    $table->timestamp('scanned_at')->useCurrent();
+    $table->timestamps();
+});
+
 }
 
     /**

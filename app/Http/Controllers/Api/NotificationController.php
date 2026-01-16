@@ -70,34 +70,41 @@ class NotificationController extends Controller
 
     // Kirim notifikasi ke semua user yang punya fcm_token
     public function send(Request $request)
-    {
-        $data = $request->validate([
-            'title' => 'required|string',
-            'body'  => 'required|string',
-        ]);
+{
+    $data = $request->validate([
+        'title' => 'required|string',
+        'body'  => 'required|string',
+    ]);
 
-        $fcmTokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
-        if (empty($fcmTokens)) {
-            return response()->json(['message' => 'Tidak ada token FCM'], 400);
-        }
-
-        $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
-        $accessToken = $this->getAccessToken();
-
-        foreach ($fcmTokens as $token) {
-            $message = [
-                "message" => [
-                    "token" => $token,
-                    "notification" => [
-                        "title" => $data['title'],
-                        "body"  => $data['body'],
-                    ],
-                ],
-            ];
-
-            Http::withToken($accessToken)->post($url, $message);
-        }
-
-        return response()->json(['message' => 'Notifikasi berhasil dikirim']);
+    $fcmTokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
+    if (empty($fcmTokens)) {
+        return response()->json(['message' => 'Tidak ada token FCM'], 400);
     }
+
+    $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
+    $accessToken = $this->getAccessToken();
+
+    foreach ($fcmTokens as $token) {
+        $message = [
+            "message" => [
+                "token" => $token,
+                "data" => [                     // ✅ DATA ONLY
+                    "title" => $data['title'],
+                    "body"  => $data['body'],
+                    "type"  => "general",
+                ],
+                "android" => [
+                    "priority" => "high",
+                ],
+            ],
+        ];
+
+        Http::withToken($accessToken)
+            ->withHeader('Content-Type', 'application/json')
+            ->post($url, $message);
+    }
+
+    return response()->json(['message' => 'Notifikasi berhasil dikirim']);
+}
+
 }

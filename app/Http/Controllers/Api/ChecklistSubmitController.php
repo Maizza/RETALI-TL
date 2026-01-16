@@ -32,7 +32,9 @@ class ChecklistSubmitController extends Controller
         'answers'      => 'required|array|min:1',
         'answers.*.checklist_question_id' => 'required|integer|exists:checklist_questions,id',
         'answers.*.value' => 'required|in:sudah,tidak,rekan',
-        'answers.*.note'  => 'nullable|string|max:500',
+        'answers.*.note' =>
+        'required_if:answers.*.value,tidak,rekan|nullable|string|max:500',
+
     ]);
 
     // Ambil NAMA kloter dari relasi Tourleader -> Kloter

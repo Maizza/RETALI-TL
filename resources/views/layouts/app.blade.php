@@ -14,14 +14,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-
     <style>
         :root {
             --sidebar-width: 280px;
-            --primary-color: #1A365D; /* Navy blue - elegan dan profesional */
-            --secondary-color: #2C5282; /* Blue lebih terang */
-            --accent-color: #D4AF37; /* Emas - untuk aksen */
-            --light-bg: #F7FAFC; /* Light blue gray */
+            --primary-color: #1A365D;
+            --secondary-color: #2C5282;
+            --accent-color: #D4AF37;
+            --light-bg: #F7FAFC;
             --dark-bg: #1E1E2D;
             --text-light: #FFFFFF;
             --text-dark: #2D3748;
@@ -61,14 +60,41 @@
             z-index: 1000;
             position: fixed;
             height: 100vh;
-            overflow-y: auto;
+            overflow: hidden; /* Diubah dari auto ke hidden */
             transition: var(--transition);
+        }
+
+        /* Area menu yang bisa discroll */
+        .sidebar-menu-scroll {
+            flex: 1;
+            overflow-y: auto; /* Hanya bagian ini yang bisa discroll */
+            padding-bottom: 20px;
+        }
+
+        /* Custom scrollbar untuk area menu */
+        .sidebar-menu-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar-menu-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .sidebar-menu-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar-menu-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .sidebar-header {
             padding: 28px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             background: rgba(0, 0, 0, 0.1);
+            flex-shrink: 0; /* Header tidak mengecil */
         }
 
         .sidebar-brand {
@@ -116,7 +142,7 @@
             width: 24px;
             text-align: center;
             transition: var(--transition);
-            color: var(--accent-color); /* Ikon berwarna emas */
+            color: var(--accent-color);
         }
 
         .sidebar .nav-link:hover {
@@ -127,7 +153,7 @@
 
         .sidebar .nav-link:hover i {
             transform: scale(1.1);
-            color: #FFD700; /* Warna emas lebih terang saat hover */
+            color: #FFD700;
         }
 
         .sidebar .nav-link.active {
@@ -135,15 +161,15 @@
             color: var(--text-light);
             font-weight: 600;
             box-shadow: 0 6px 20px rgba(42, 67, 101, 0.4);
-            border-left: 4px solid var(--accent-color); /* Garis aksen emas */
+            border-left: 4px solid var(--accent-color);
         }
 
         .sidebar .nav-link.active::before {
-            display: none; /* Menghilangkan garis sebelumnya */
+            display: none;
         }
 
         .sidebar .nav-link.active i {
-            color: var(--accent-color); /* Ikon berwarna emas untuk menu aktif */
+            color: var(--accent-color);
         }
 
         /* Submenu Styles */
@@ -177,13 +203,13 @@
             background: rgba(255, 255, 255, 0.2);
             color: var(--text-light);
             font-weight: 500;
-            border-left: 3px solid var(--accent-color); /* Garis aksen emas */
+            border-left: 3px solid var(--accent-color);
         }
 
         .submenu-item i {
             font-size: 1rem;
             width: 20px;
-            color: var(--accent-color); /* Ikon submenu berwarna emas */
+            color: var(--accent-color);
         }
 
         .sidebar-footer {
@@ -191,6 +217,7 @@
             margin-top: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.12);
             background: rgba(0, 0, 0, 0.1);
+            flex-shrink: 0; /* Footer tidak mengecil */
         }
 
         .user-info {
@@ -204,8 +231,8 @@
             width: 52px;
             height: 52px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-color) 0%, #B8860B 100%); /* Gradien emas */
-            color: var(--primary-color); /* Warna teks navy */
+            background: linear-gradient(135deg, var(--accent-color) 0%, #B8860B 100%);
+            color: var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -227,7 +254,7 @@
         .user-role {
             font-size: 0.8rem;
             opacity: 0.85;
-            color: var(--accent-color); /* Warna emas untuk role */
+            color: var(--accent-color);
         }
 
         .btn-logout {
@@ -250,7 +277,7 @@
         .btn-logout:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-1px);
-            color: var(--accent-color); /* Warna emas saat hover */
+            color: var(--accent-color);
         }
 
         /* ===== CONTENT ===== */
@@ -271,7 +298,7 @@
         .page-title {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--primary-color); /* Warna navy untuk judul */
+            color: var(--primary-color);
             margin-bottom: 8px;
         }
 
@@ -307,7 +334,7 @@
             font-weight: 600;
             padding: 20px 24px;
             border-radius: 16px 16px 0 0 !important;
-            color: var(--primary-color); /* Warna navy untuk header card */
+            color: var(--primary-color);
             font-size: 1.1rem;
         }
 
@@ -323,7 +350,7 @@
             color: var(--text-light);
             height: 100%;
             transition: var(--transition);
-            border-bottom: 3px solid var(--accent-color); /* Garis aksen emas */
+            border-bottom: 3px solid var(--accent-color);
         }
 
         .stats-card:hover {
@@ -335,7 +362,7 @@
             font-size: 2.5rem;
             margin-bottom: 16px;
             opacity: 0.9;
-            color: var(--accent-color); /* Ikon stats berwarna emas */
+            color: var(--accent-color);
         }
 
         .stats-number {
@@ -387,9 +414,8 @@
             border-color: var(--border-color);
         }
 
-        /* Warna aksen untuk elemen tabel */
         .table-hover tbody tr:hover {
-            background-color: rgba(212, 175, 55, 0.1); /* Warna emas transparan saat hover */
+            background-color: rgba(212, 175, 55, 0.1);
         }
 
         /* ===== RESPONSIVE ===== */
@@ -450,6 +476,11 @@
             .sidebar:hover .btn-logout {
                 justify-content: flex-start;
             }
+
+            /* Responsive untuk sidebar-menu-scroll */
+            .sidebar-menu-scroll {
+                padding-bottom: 10px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -466,7 +497,8 @@
             .sidebar-header,
             .user-info,
             .sidebar-footer,
-            .submenu {
+            .submenu,
+            .sidebar-menu-scroll {
                 display: none;
             }
 
@@ -475,10 +507,12 @@
                 justify-content: space-around;
                 padding: 10px;
                 gap: 5px;
+                overflow-x: auto;
             }
 
             .nav-item {
                 flex: 1;
+                min-width: 70px;
             }
 
             .nav-link {
@@ -493,7 +527,7 @@
             .nav-link i {
                 font-size: 1.1rem;
                 margin-bottom: 4px;
-                color: var(--accent-color); /* Pastikan ikon tetap berwarna emas */
+                color: var(--accent-color);
             }
 
             .nav-link span {
@@ -524,6 +558,20 @@
             .page-title {
                 font-size: 1.4rem;
             }
+
+            .nav-pills {
+                gap: 2px;
+                padding: 8px 5px;
+            }
+
+            .nav-link {
+                padding: 8px 3px;
+                font-size: 0.6rem;
+            }
+
+            .nav-link i {
+                font-size: 1rem;
+            }
         }
 
         /* ===== ANIMATIONS ===== */
@@ -542,7 +590,7 @@
             animation: fadeInUp 0.6s ease-out;
         }
 
-        /* ===== SCROLLBAR ===== */
+        /* ===== SCROLLBAR (untuk seluruh halaman) ===== */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -585,202 +633,227 @@
 </head>
 
 <body>
-   <!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <a href="{{ route('dashboard') }}" class="sidebar-brand">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="sidebar-logo">
-            <span>Retali System</span>
-        </a>
-    </div>
-
-    <ul class="nav nav-pills flex-column mb-auto">
-
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" 
-               href="{{ route('dashboard') }}">
-                <i class="fas fa-chart-line"></i>
-                <span>Dashboard</span>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ route('dashboard') }}" class="sidebar-brand">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="sidebar-logo">
+                <span>Retali Operation</span>
             </a>
-        </li>
+        </div>
 
-        <!-- Pengguna -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('pengguna*', 'tourleaders*') ? 'active' : '' }}"
-            href="#penggunaSubmenu" data-bs-toggle="collapse" 
-            aria-expanded="{{ request()->is('pengguna*', 'tourleaders*') ? 'true' : 'false' }}">
-                <i class="fas fa-users"></i>
-                <span>Pengguna</span>
-                <i class="fas fa-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse {{ request()->is('pengguna*', 'tourleaders*') ? 'show' : '' }}" 
-                 id="penggunaSubmenu">
-                <div class="submenu">
-                    <a href="{{ route('tourleaders.index') }}" 
-                       class="submenu-item {{ request()->is('tourleaders*') ? 'active' : '' }}">
-                        <i class="fas fa-user-tie"></i>
-                        Tour Leader
+        <!-- Area menu yang bisa discroll -->
+        <div class="sidebar-menu-scroll">
+            <ul class="nav nav-pills flex-column mb-auto">
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}"
+                       href="{{ route('dashboard') }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
                     </a>
-                    <a href="" 
-                       class="submenu-item {{ request()->is('pengguna/mutowif*') ? 'active' : '' }}">
-                        <i class="fas fa-user-check"></i>
-                        Muthawif
+                </li>
+
+                <!-- Pengguna -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('pengguna*', 'tourleaders*') ? 'active' : '' }}"
+                    href="#penggunaSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ request()->is('pengguna*', 'tourleaders*') ? 'true' : 'false' }}">
+                        <i class="fas fa-users"></i>
+                        <span>Pengguna</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
                     </a>
-                </div>
-            </div>
-        </li>
+                    <div class="collapse {{ request()->is('pengguna*', 'tourleaders*') ? 'show' : '' }}"
+                         id="penggunaSubmenu">
+                        <div class="submenu">
+                            <a href="{{ route('tourleaders.index') }}"
+                               class="submenu-item {{ request()->is('tourleaders*') ? 'active' : '' }}">
+                                <i class="fas fa-user-tie"></i>
+                                Tour Leader
+                            </a>
+                            <a href="{{ route('muthawif.index') }}"
+                               class="submenu-item {{ request()->is('pengguna/mutowif*') ? 'active' : '' }}">
+                                <i class="fas fa-user-check"></i>
+                                Muthawif
+                            </a>
+                        </div>
+                    </div>
+                </li>
 
-        <!-- Tugas -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('tugas*') ? 'active' : '' }}"
-            href="#tugasSubmenu" data-bs-toggle="collapse" 
-            aria-expanded="{{ request()->is('tugas*') ? 'true' : 'false' }}">
-                <i class="fas fa-tasks"></i>
-                <span>Tugas</span>
-                <i class="fas fa-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse {{ request()->is('tugas*') ? 'show' : '' }}" id="tugasSubmenu">
-                <div class="submenu">
-                    <a href="{{ route('admin.tasks.index') }}" 
-                       class="submenu-item {{ request()->is('admin/tugas*') ? 'active' : '' }}">
-                        <i class="fas fa-user-cog"></i>
-                        Tugas Tourleader
+                <!-- Tugas -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('tugas*') ? 'active' : '' }}"
+                    href="#tugasSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ request()->is('tugas*') ? 'true' : 'false' }}">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tugas</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
                     </a>
-                    <a href="{{ route('admin.ceklis.index') }}" 
-                       class="submenu-item {{ request()->is('tugas/ceklis*') ? 'active' : '' }}">
-                        <i class="fas fa-clipboard-check"></i>
-                        Tugas Ceklis
+                    <div class="collapse {{ request()->is('tugas*') ? 'show' : '' }}" id="tugasSubmenu">
+                        <div class="submenu">
+                            <a href="{{ route('admin.tasks.index') }}"
+                               class="submenu-item {{ request()->is('admin/tugas*') ? 'active' : '' }}">
+                                <i class="fas fa-user-cog"></i>
+                                Tugas Tourleader
+                            </a>
+                            <a href="{{ route('admin.ceklis.index') }}"
+                               class="submenu-item {{ request()->is('tugas/ceklis*') ? 'active' : '' }}">
+                                <i class="fas fa-clipboard-check"></i>
+                                Tugas Ceklis
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Itinerary -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.itineraries.*') ? 'active' : '' }}"
+                     href="#itinerarySubmenu"
+                     data-bs-toggle="collapse"
+                     aria-expanded="{{ request()->routeIs('admin.itineraries.*') ? 'true' : 'false' }}">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Itinerary</span>
+                    <i class="fas fa-chevron-down ms-auto"></i>
+                  </a>
+
+                  <div class="collapse {{ request()->routeIs('admin.itinerary.*') ? 'show' : '' }}" id="itinerarySubmenu">
+                    <div class="submenu">
+                      <a href="{{ route('admin.itinerary.index') }}"
+                         class="submenu-item {{ request()->routeIs('admin.itinerary.index') ? 'active' : '' }}">
+                        <i class="fas fa-map"></i> Halaman Itinerary
+                      </a>
+
+                      <a href="{{ route('admin.itinerary.kota.index') }}"
+                         class="submenu-item {{ request()->routeIs('admin.itinerary.kota.index') ? 'active' : '' }}">
+                        <i class="fas fa-city"></i>
+                        Pilihan Kota
+                      </a>
+                    </div>
+                  </div>
+                </li>
+
+                <!-- Kloter -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('kloter*') ? 'active' : '' }}"
+                       href="{{ route('kloter.index') }}">
+                        <i class="fas fa-plane-departure"></i>
+                        <span>Kloter</span>
                     </a>
-                </div>
-            </div>
-        </li>
+                </li>
 
-        <!-- Itinerary (NEW) -->
-        <!-- Itinerary -->
+                <!-- Riwayat Absensi -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'active' : '' }}"
+                       href="#absensiSubmenu"
+                       data-bs-toggle="collapse"
+                       aria-expanded="{{ request()->is('admin/attendances*', 'admin/absensi*') ? 'true' : 'false' }}">
+                        <i class="fas fa-user-clock"></i>
+                        <span>Riwayat Absensi</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </a>
 
-        <li class="nav-item">
-    <a class="nav-link {{ request()->routeIs('admin.itineraries.*') ? 'active' : '' }}"
-     href="#itinerarySubmenu"
-     data-bs-toggle="collapse"
-     aria-expanded="{{ request()->routeIs('admin.itineraries.*') ? 'true' : 'false' }}">
-    <i class="fas fa-map-marked-alt"></i>
-    <span>Itinerary</span>
-    <i class="fas fa-chevron-down ms-auto"></i>
-  </a>
+                    <div class="collapse {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'show' : '' }}" id="absensiSubmenu">
+                        <div class="submenu">
+                            <!-- Absensi Tour Leader -->
+                            <a href="{{ route('admin.attendances.index') }}"
+                               class="submenu-item {{ request()->is('admin/attendances*') ? 'active' : '' }}">
+                                <i class="fas fa-user-tie"></i>
+                                Absensi Tour Leader
+                            </a>
 
-  <div class="collapse {{ request()->routeIs('admin.itinerary.*') ? 'show' : '' }}" id="itinerarySubmenu">
-    <div class="submenu">
-      <a href="{{ route('admin.itinerary.index') }}"
-         class="submenu-item {{ request()->routeIs('admin.itinerary.index') ? 'active' : '' }}">
-        <i class="fas fa-map"></i> Halaman Itinerary
-      </a>
+                            <!-- Absensi Jamaah -->
+                            <a href="{{ route('jamaah.index') }}"
+                               class="submenu-item {{ request()->is('admin/jamaah*') ? 'active' : '' }}">
+                                <i class="fas fa-users"></i>
+                                Absensi Jamaah
+                            </a>
+                        </div>
+                    </div>
+                </li>
 
-       <!-- Pilihan Kota (contoh; ganti ke route yg benar kalau sudah ada) -->
-            <a href="{{ route('admin.itinerary.kota.index') }}"
-            class="submenu-item {{ request()->routeIs('admin.itinerary.kota.index') ? 'active' : '' }}">                <i class="fas fa-city"></i>
-                Pilihan Kota
-            </a>
-    </div>
-  </div>
-</li>
-
-        <!-- Kloter -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('kloter*') ? 'active' : '' }}" 
-               href="{{ route('kloter.index') }}">
-                <i class="fas fa-plane-departure"></i>
-                <span>Kloter</span>
-            </a>
-        </li>
-
-        <!-- Riwayat Absensi -->
+               <!-- Riwayat Scan (Ubah dari link tunggal menjadi submenu) -->
 <li class="nav-item">
-    <a class="nav-link {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'active' : '' }}"
-       href="#absensiSubmenu"
+    <a class="nav-link {{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'active' : '' }}"
+       href="#scanSubmenu"
        data-bs-toggle="collapse"
-       aria-expanded="{{ request()->is('admin/attendances*', 'admin/absensi*') ? 'true' : 'false' }}">
-        <i class="fas fa-user-clock"></i>
-        <span>Riwayat Absensi</span>
+       aria-expanded="{{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'true' : 'false' }}">
+        <i class="fas fa-history"></i>
+        <span>Riwayat Scan</span>
         <i class="fas fa-chevron-down ms-auto"></i>
     </a>
 
-    <div class="collapse {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'show' : '' }}" id="absensiSubmenu">
+    <div class="collapse {{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'show' : '' }}" id="scanSubmenu">
         <div class="submenu">
-
-            <!-- Absensi Tour Leader -->
-            <a href="{{ route('admin.attendances.index') }}"
-               class="submenu-item {{ request()->is('admin/attendances*') ? 'active' : '' }}">
-                <i class="fas fa-user-tie"></i>
-                Absensi Tour Leader
+            <!-- Scan Koper -->
+            <a href="{{ route('scans.index') }}"
+               class="submenu-item {{ request()->is('scan/koper*') || request()->is('scans/koper*') ? 'active' : '' }}">
+                <i class="fas fa-suitcase-rolling"></i>
+                Scan Koper
             </a>
 
-            <!-- Absensi Jamaah -->
-            <a href="{{ route('jamaah.index') }}"
-               class="submenu-item {{ request()->is('admin/jamaah*') ? 'active' : '' }}">
-                <i class="fas fa-users"></i>
-                Absensi Jamaah
+            <!-- Scan Paspor -->
+            <a href="{{ route('scan-paspor.index') }}"
+               class="submenu-item {{ request()->is('scan-paspor*') ? 'active' : '' }}">
+                  <i class="fas fa-passport"></i>
+                  Scan Paspor
             </a>
 
         </div>
     </div>
 </li>
 
-
-        <!-- Riwayat Scan -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('scans*') ? 'active' : '' }}" 
-               href="{{ route('scans.index') }}">
-                <i class="fas fa-history"></i>
-                <span>Riwayat Scan</span>
-            </a>
-        </li>
-
-        <!-- Notifikasi -->
-        <li class="nav-item">
-            <a class="nav-link {{ request()->is('notifications*', 'admin/notifications*') ? 'active' : '' }}"
-               href="{{ route('admin.notifications.index') }}">
-                <i class="fas fa-bell"></i>
-                <span>Notifikasi</span>
-            </a>
-        </li>
-
-    </ul>
-
-    <div class="sidebar-footer">
-        @auth
-        <div class="user-info">
-            <div class="user-avatar">
-                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-            </div>
-            <div class="user-details">
-                <div class="user-name">{{ Auth::user()->name }}</div>
-                <div class="user-role">Administrator</div>
-            </div>
+                <!-- Notifikasi -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('notifications*', 'admin/notifications*') ? 'active' : '' }}"
+                       href="{{ route('admin.notifications.index') }}">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifikasi</span>
+                    </a>
+                </li>
+            </ul>
         </div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn-logout">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </button>
-        </form>
-        @else
-        <a href="{{ route('login') }}" class="btn-logout" style="text-decoration: none;">
-            <i class="fas fa-sign-in-alt"></i>
-            <span>Login</span>
-        </a>
-        @endauth
+
+        <div class="sidebar-footer">
+            @php
+                $user = auth('web')->user();
+            @endphp
+
+            @if ($user)
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">{{ $user->name }}</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="btn-logout" style="text-decoration: none;">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+            @endif
+        </div>
     </div>
-</div>
 
-<!-- Content -->
-<div class="content fade-in-up">
-    @yield('content')
-</div>
+    <!-- Content -->
+    <div class="content fade-in-up">
+        @yield('content')
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-     @yield('scripts')   <!-- WAJIB ADA DI SINI -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   @stack('scripts')
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Smooth animations
@@ -815,5 +888,4 @@
         });
     </script>
 </body>
-
 </html>

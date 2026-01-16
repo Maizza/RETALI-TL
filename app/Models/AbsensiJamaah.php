@@ -2,34 +2,38 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AbsensiJamaah extends Model
 {
-    use HasFactory;
-
     protected $table = 'absensi_jamaah';
 
     protected $fillable = [
+        'kloter_id',
         'judul_absen',
-        'tourleader_id',
-        'sesi_absen'
+        'sesi_absen_id',
+        'sesi_absen_item_id',
     ];
 
-    protected $casts = [
-        'sesi_absen' => 'string',
-    ];
+    /* ================= RELATIONS ================= */
 
-    // Absen punya banyak jamaah
+    public function kloter()
+    {
+        return $this->belongsTo(Kloter::class);
+    }
+
+    public function sesiAbsen()
+    {
+        return $this->belongsTo(SesiAbsen::class);
+    }
+
+    public function sesiAbsenItem()
+    {
+        return $this->belongsTo(SesiAbsenItem::class);
+    }
+
     public function jamaah()
     {
         return $this->hasMany(Jamaah::class, 'absen_id');
-    }
-
-    // Owner absen = Tour Leader
-    public function tourleader()
-    {
-        return $this->belongsTo(TourLeader::class, 'tourleader_id');
     }
 }

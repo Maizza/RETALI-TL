@@ -9,6 +9,7 @@ use App\Models\TourLeader;
 use App\Models\ChecklistTask;
 use App\Models\ChecklistQuestion;
 use Illuminate\Support\Facades\Session;
+use App\Models\ChecklistSubmission;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -194,4 +195,33 @@ class ChecklistTaskController extends Controller
 
         return view('admin.ceklis.result', compact('task', 'sudah', 'belum'));
     }
+
+    public function hasilDetail(ChecklistTask $task, ChecklistSubmission $submission)
+{
+    // Pastikan submission memang milik task ini
+    if ($submission->checklist_task_id !== $task->id) {
+        abort(404);
+    }
+
+    // Load relasi yang dibutuhkan (sekali query, bersih)
+    $submission->load([
+        'tourleader',
+        'answers.question' => function ($q) {
+            $q->orderBy('order_no');
+        }
+    ]);
+
+    // Mapping label status (untuk tampilan web)
+    $statusLabels = [
+        'sudah' => 'Sudah',
+        'tidak' => 'Tidak terpenuhi',
+        'rekan' => 'Dikerjakan oleh rekan',
+    ];
+
+    return view('admin.ceklis.hasil-detail', [
+        'task'          => $task,
+        'submission'    => $submission,
+        'statusLabels'  => $statusLabels,
+    ]);
+}
 }

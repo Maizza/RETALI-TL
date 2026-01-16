@@ -3,9 +3,10 @@
 return [
 
     'defaults' => [
-        'guard' => 'web',
-        'passwords' => 'users',
-    ],
+    'guard' => 'web', // ✅ WAJIB WEB
+    'passwords' => 'users',
+],
+
 
     'guards' => [
         'web' => [
@@ -13,9 +14,9 @@ return [
             'provider' => 'users',
         ],
 
-        // Guard untuk tour leader (pakai sanctum/api)
+        // ✅ GUARD UNTUK API TOUR LEADER
         'tourleader' => [
-            'driver' => 'sanctum',   // 🔑 kalau pakai Sanctum
+            'driver' => 'sanctum',
             'provider' => 'tourleaders',
         ],
     ],
@@ -26,30 +27,9 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        // Provider untuk tour leader
         'tourleaders' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Tourleader::class,
+            'model' => App\Models\TourLeader::class,
         ],
     ],
-
-    'passwords' => [
-        'users' => [
-            'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
-        ],
-
-        // Password reset khusus tour leader (kalau mau pisah)
-        'tourleaders' => [
-            'provider' => 'tourleaders',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
-        ],
-    ],
-
-    'password_timeout' => 10800,
-
 ];

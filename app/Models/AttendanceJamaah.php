@@ -2,26 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AttendanceJamaah extends Model
 {
-    use HasFactory;
-
     protected $table = 'attendance_jamaah';
 
     protected $fillable = [
-        'jamaah_id',
-        'tanggal',
-        'sesi',
-        'status',
-        'catatan',
-        'created_by',
-    ];
+    'jamaah_id',
+    'absensi_jamaah_id',
+    'absen_ke', // ⬅️ WAJIB
+    'tanggal',
+    'status',
+    'catatan',
+    'created_by',
+];
 
     protected $casts = [
-        'tanggal' => 'date:Y-m-d',
+        'tanggal' => 'date',
     ];
 
     public function jamaah()
@@ -29,7 +27,12 @@ class AttendanceJamaah extends Model
         return $this->belongsTo(Jamaah::class, 'jamaah_id');
     }
 
-    public function creator()
+    public function absen()
+    {
+        return $this->belongsTo(AbsensiJamaah::class, 'absensi_jamaah_id');
+    }
+
+    public function tourleader()
     {
         return $this->belongsTo(TourLeader::class, 'created_by');
     }

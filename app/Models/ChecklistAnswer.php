@@ -25,4 +25,25 @@ class ChecklistAnswer extends Model
     {
         return $this->belongsTo(ChecklistQuestion::class, 'checklist_question_id');
     }
+
+    public function getStatusLabelAttribute(): string
+{
+    return match ($this->value) {
+        'sudah' => 'Sudah',
+        'tidak' => 'Tidak terpenuhi',
+        'rekan' => 'Dikerjakan oleh rekan',
+        default => ucfirst($this->value),
+    };
+}
+
+public function getStatusBadgeAttribute(): string
+{
+    return match ($this->value) {
+        'sudah' => 'success',
+        'tidak' => 'danger',
+        'rekan' => 'warning',
+        default => 'secondary',
+    };
+}
+
 }
