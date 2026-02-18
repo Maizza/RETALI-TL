@@ -15,20 +15,19 @@ use App\Models\Jamaah;
 use App\Models\AbsensiJamaah;
 use App\Models\AttendanceJamaah;
 use App\Models\SesiAbsen;
-use App\Models\SesiAbsenItem;
 
 class JamaahController extends Controller
 {
     /* ======================================================
-     * INDEX – LIST MASTER ABSEN
+     * INDEX
      * ====================================================== */
     public function index()
     {
         $absen = AbsensiJamaah::with([
-                'kloter',
-                'sesiAbsen',
-                'sesiAbsenItem'
-            ])
+            'kloter',
+            'sesiAbsen',
+            'sesiAbsenItem'
+        ])
             ->withCount('jamaah')
             ->latest()
             ->get();
@@ -37,7 +36,7 @@ class JamaahController extends Controller
     }
 
     /* ======================================================
-     * DETAIL #1 – LIST TOUR LEADER
+     * DETAIL TOUR LEADER LIST
      * ====================================================== */
     public function detail($absenId)
     {
@@ -72,7 +71,7 @@ class JamaahController extends Controller
     }
 
     /* ======================================================
-     * DETAIL #2 – JAMAAH PER TOUR LEADER
+     * DETAIL JAMAAH PER TL
      * ====================================================== */
     public function detailTourleader($absenId, $tourleaderId)
     {
@@ -86,7 +85,8 @@ class JamaahController extends Controller
 
         $jamaah = Jamaah::where('absen_id', $absen->id)
             ->where('assigned_tourleader_id', $tourleader->id)
-            ->orderBy('nama_jamaah')
+            ->with('latestAttendance')
+            ->orderBy('urutan_absen')
             ->paginate(100);
 
         return view(
@@ -107,124 +107,129 @@ class JamaahController extends Controller
     }
 
     /* ======================================================
-     * PROSES IMPORT (MULTI TOUR LEADER)
+     * IMPORT FINAL VERSION
      * ====================================================== */
     public function import(Request $request)
-    {
-        $request->validate([
-            'kloter_id'          => 'required|exists:kloters,id',
-            'sesi_absen_id'      => 'required|exists:sesi_absens,id',
-            'sesi_absen_item_id' => 'required|exists:sesi_absen_items,id',
-            'files'              => 'nullable|array',
-        ]);
+{
+    $request->validate([
+        'kloter_id'          => 'required|exists:kloters,id',
+        'sesi_absen_id'      => 'required|exists:sesi_absens,id',
+        'sesi_absen_item_id' => 'required|exists:sesi_absen_items,id',
+        'files'              => 'required|array|min:1',
+    ]);
 
-        DB::beginTransaction();
+    if (!$request->hasFile('files')) {
+        return back()->withErrors(['Minimal satu file Excel harus diupload']);
+    }
 
-        try {
+    DB::beginTransaction();
 
-            $kloter = Kloter::findOrFail($request->kloter_id);
+    try {
 
-            $existing = AbsensiJamaah::where('kloter_id', $kloter->id)
-                ->where('sesi_absen_id', $request->sesi_absen_id)
-                ->where('sesi_absen_item_id', $request->sesi_absen_item_id)
-                ->first();
+        $kloter = Kloter::findOrFail($request->kloter_id);
 
-            if ($existing) {
-                return back()->withErrors([
-                    'Sesi absen untuk kloter ini sudah pernah dibuat.'
-                ]);
-            }
-
-            $absen = AbsensiJamaah::create([
+        $absen = AbsensiJamaah::firstOrCreate(
+            [
                 'kloter_id'          => $kloter->id,
-                'judul_absen'        => $kloter->nama,
                 'sesi_absen_id'      => $request->sesi_absen_id,
                 'sesi_absen_item_id' => $request->sesi_absen_item_id,
-            ]);
+            ],
+            ['judul_absen' => $kloter->nama]
+        );
 
-            $totalInserted = 0;
+        $totalInserted = 0;
 
-            foreach ((array) $request->file('files') as $tourleaderId => $file) {
+        foreach ($request->file('files') as $tourleaderId => $file) {
 
-                if (!$file) continue;
+            if (!$file || !$file->isValid()) continue;
 
-                $validTL = TourLeader::where('id', $tourleaderId)
-                    ->where('kloter_id', $kloter->id)
-                    ->exists();
+            $validTL = TourLeader::where('id', $tourleaderId)
+                ->where('kloter_id', $kloter->id)
+                ->exists();
 
-                if (!$validTL) continue;
+            if (!$validTL) continue;
 
-                $sheet = IOFactory::load($file->getRealPath())
-                    ->getActiveSheet();
+            $sheet = IOFactory::load($file->getRealPath())->getActiveSheet();
+            $highestRow = $sheet->getHighestDataRow();
 
-                $highestRow = $sheet->getHighestDataRow();
+            $currentMaxUrutan = Jamaah::where('absen_id', $absen->id)
+                ->where('assigned_tourleader_id', $tourleaderId)
+                ->max('urutan_absen') ?? 0;
 
-                for ($row = 2; $row <= $highestRow; $row++) {
+            for ($row = 2; $row <= $highestRow; $row++) {
 
-                    $nama = trim((string) $sheet->getCell("A{$row}")->getValue());
-                    if ($nama === '') continue;
+                $nama = trim((string) $sheet->getCell("B{$row}")->getValue());
+                if ($nama === '') continue;
 
-                    $noPaspor   = trim((string) $sheet->getCell("B{$row}")->getValue());
-                    $noHp       = trim((string) $sheet->getCell("C{$row}")->getValue());
-                    $jkRaw      = trim((string) $sheet->getCell("D{$row}")->getValue());
-                    $tglRaw     = trim((string) $sheet->getCell("E{$row}")->getValue());
-                    $kodeKloter = trim((string) $sheet->getCell("F{$row}")->getValue());
-                    $nomorBus   = trim((string) $sheet->getCell("G{$row}")->getValue());
-                    $ket        = trim((string) $sheet->getCell("H{$row}")->getValue());
+                $currentMaxUrutan++;
 
-                    $jkClean = preg_replace('/[^a-z]/', '', strtolower($jkRaw));
-                    $jenisKelamin = in_array($jkClean, ['l','lk','laki','lakilaki'])
-                        ? 'L'
-                        : (in_array($jkClean, ['p','pr','perempuan','wanita']) ? 'P' : null);
+                $noPaspor   = trim((string) $sheet->getCell("C{$row}")->getValue());
+                $noHp       = trim((string) $sheet->getCell("D{$row}")->getValue());
+                $jkRaw      = trim((string) $sheet->getCell("E{$row}")->getValue());
+                $tglRaw     = trim((string) $sheet->getCell("F{$row}")->getValue());
+                $kodeKloter = trim((string) $sheet->getCell("G{$row}")->getValue());
+                $nomorBus   = trim((string) $sheet->getCell("H{$row}")->getValue());
+                $ket        = trim((string) $sheet->getCell("I{$row}")->getValue());
 
-                    $tanggalLahir = null;
-                    if ($tglRaw) {
-                        try {
-                            $tanggalLahir = is_numeric($tglRaw)
-                                ? ExcelDate::excelToDateTimeObject($tglRaw)->format('Y-m-d')
-                                : \Carbon\Carbon::parse($tglRaw)->format('Y-m-d');
-                        } catch (\Throwable $e) {}
-                    }
+                $jkClean = preg_replace('/[^a-z]/', '', strtolower($jkRaw));
+                $jenisKelamin = in_array($jkClean, ['l','lk','laki','lakilaki'])
+                    ? 'L'
+                    : (in_array($jkClean, ['p','pr','perempuan','wanita'])
+                        ? 'P'
+                        : null);
 
-                    $jamaah = Jamaah::create([
-                        'absen_id'               => $absen->id,
-                        'assigned_tourleader_id' => $tourleaderId,
-                        'nama_jamaah'            => $nama,
-                        'no_paspor'              => $noPaspor ?: null,
-                        'no_hp'                  => $noHp ?: null,
-                        'jenis_kelamin'          => $jenisKelamin,
-                        'tanggal_lahir'          => $tanggalLahir,
-                        'kode_kloter'            => $kodeKloter ?: null,
-                        'nomor_bus'              => $nomorBus ?: null,
-                        'keterangan'             => $ket ?: null,
-                    ]);
-
-                    // 🔑 RECORD AWAL (WAJIB)
-                    AttendanceJamaah::create([
-                        'jamaah_id'         => $jamaah->id,
-                        'absensi_jamaah_id' => $absen->id,
-                        'absen_ke'          => 1,
-                        'tanggal'           => now()->toDateString(),
-                        'status'            => 'BELUM_ABSEN',
-                        'catatan'           => null,
-                        'created_by'        => $tourleaderId,
-                    ]);
-
-                    $totalInserted++;
+                $tanggalLahir = null;
+                if ($tglRaw) {
+                    try {
+                        $tanggalLahir = is_numeric($tglRaw)
+                            ? ExcelDate::excelToDateTimeObject($tglRaw)->format('Y-m-d')
+                            : \Carbon\Carbon::parse($tglRaw)->format('Y-m-d');
+                    } catch (\Throwable $e) {}
                 }
+
+                $jamaah = Jamaah::create([
+                    'absen_id'               => $absen->id,
+                    'assigned_tourleader_id' => $tourleaderId,
+                    'urutan_absen'           => $currentMaxUrutan,
+                    'nama_jamaah'            => $nama,
+                    'no_paspor'              => $noPaspor ?: null,
+                    'no_hp'                  => $noHp ?: null,
+                    'jenis_kelamin'          => $jenisKelamin,
+                    'tanggal_lahir'          => $tanggalLahir,
+                    'kode_kloter'            => $kodeKloter ?: null,
+                    'nomor_bus'              => $nomorBus ?: null,
+                    'keterangan'             => $ket ?: null,
+                ]);
+
+                AttendanceJamaah::create([
+                    'jamaah_id'         => $jamaah->id,
+                    'absensi_jamaah_id' => $absen->id,
+                    'absen_ke'          => 1,
+                    'tanggal'           => now()->toDateString(),
+                    'status'            => 'BELUM_ABSEN',
+                    'created_by'        => $tourleaderId,
+                ]);
+
+                $totalInserted++;
             }
-
-            DB::commit();
-
-            return redirect()
-                ->route('jamaah.index')
-                ->with('success', "Import selesai. Total jamaah: {$totalInserted}");
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw $e;
         }
+
+        DB::commit();
+
+        return redirect()
+            ->route('jamaah.index')
+            ->with('success', "Import selesai. Berhasil memasukkan $totalInserted jamaah.");
+
+    } catch (\Throwable $e) {
+
+        DB::rollBack();
+
+        return back()->withErrors([
+            'Gagal import: ' . $e->getMessage()
+        ]);
     }
+}
+
 
     /* ======================================================
      * DELETE

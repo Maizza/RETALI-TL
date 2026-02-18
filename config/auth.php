@@ -3,33 +3,44 @@
 return [
 
     'defaults' => [
-    'guard' => 'web', // ✅ WAJIB WEB
+    'guard' => 'web',
     'passwords' => 'users',
 ],
 
-
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-
-        // ✅ GUARD UNTUK API TOUR LEADER
-        'tourleader' => [
-            'driver' => 'sanctum',
-            'provider' => 'tourleaders',
-        ],
+'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
     ],
 
-    'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
-        ],
-
-        'tourleaders' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\TourLeader::class,
-        ],
+    'tourleader' => [
+        'driver' => 'sanctum',
+        'provider' => 'tourleaders',
     ],
+
+    // 🔥 TAMBAHKAN INI
+    'muthawif' => [
+        'driver' => 'sanctum',
+        'provider' => 'muthawifs',
+    ],
+],
+
+'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\User::class,
+    ],
+
+    'tourleaders' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\TourLeader::class,
+    ],
+
+    // 🔥 TAMBAHKAN INI
+    'muthawifs' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Muthawif::class,
+    ],
+],
+
 ];

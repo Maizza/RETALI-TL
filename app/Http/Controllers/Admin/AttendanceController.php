@@ -4,21 +4,32 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use Illuminate\Support\Facades\Storage; // ⬅️ WAJIB TAMBAH INI
 
 class AttendanceController extends Controller
 {
-    /**
-     * Tampilkan daftar riwayat absensi TL.
-     * - Eager load: tourleader -> kloter
-     * - Urut terbaru
-     * - Paginate 20 per halaman
-     */
     public function index()
     {
         $rows = Attendance::with(['tourleader.kloter'])
-            ->latest()               // order by created_at desc
-            ->paginate(20);          // sesuaikan kebutuhan
+            ->latest()
+            ->paginate(20);
 
         return view('admin.attendances.index', compact('rows'));
+    }
+
+    public function destroy($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+
+        // Hapus foto jika ada
+        if ($attendance->photo_path && Storage::exists('public/' . $attendance->photo_path)) {
+            Storage::delete('public/' . $attendance->photo_path);
+        }
+
+        $attendance->delete();
+
+        return redirect()
+            ->route('admin.attendances.index')
+            ->with('success', 'Data absensi berhasil dihapus');
     }
 }

@@ -24,13 +24,14 @@ use App\Http\Controllers\Admin\JamaahController;
 use App\Http\Controllers\Admin\SesiAbsenController;
 use App\Http\Controllers\Admin\ScanPasporController;
 use App\Http\Controllers\Admin\MuthawifController;
-
+use App\Http\Controllers\Admin\AbsenMuthawifController;
 /*
 |--------------------------------------------------------------------------
 | ROOT
 |--------------------------------------------------------------------------
 */
-Route::get('/', fn () => redirect('/dashboard'));
+
+Route::get('/', fn() => redirect('/dashboard'));
 
 /*
 |--------------------------------------------------------------------------
@@ -105,24 +106,24 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/scans/export', [ScanController::class, 'export'])->name('scans.export');
     Route::delete('/scans/{scan}', [ScanController::class, 'destroy'])->name('scans.destroy');
     Route::get('/scans/{scan}/detail', [ScanController::class, 'detail'])
-    ->name('scans.detail');
+        ->name('scans.detail');
 
 
-     // ==================================================
-// RIWAYAT SCAN PASPOR
-// ==================================================
+    // ==================================================
+    // RIWAYAT SCAN PASPOR
+    // ==================================================
 
-Route::get('/scan-paspor', [ScanPasporController::class, 'index'])
-    ->name('scan-paspor.index');
+    Route::get('/scan-paspor', [ScanPasporController::class, 'index'])
+        ->name('scan-paspor.index');
 
-Route::get('/scan-paspor/export', [ScanPasporController::class, 'export'])
-    ->name('scan-paspor.export');
+    Route::get('/scan-paspor/export', [ScanPasporController::class, 'export'])
+        ->name('scan-paspor.export');
 
-Route::get('/scan-paspor/{passportScan}', [ScanPasporController::class, 'show'])
-    ->name('scan-paspor.show');
+    Route::get('/scan-paspor/{passportScan}', [ScanPasporController::class, 'show'])
+        ->name('scan-paspor.show');
 
-Route::delete('/scan-paspor/{passportScan}', [ScanPasporController::class, 'destroy'])
-    ->name('scan-paspor.destroy');
+    Route::delete('/scan-paspor/{passportScan}', [ScanPasporController::class, 'destroy'])
+        ->name('scan-paspor.destroy');
 
 
     /*
@@ -139,11 +140,6 @@ Route::delete('/scan-paspor/{passportScan}', [ScanPasporController::class, 'dest
             return response()->json(
                 $kloter->tourleaders()->select('id', 'name')->get()
             );
-        });
-
-        Route::prefix('sesi-absen')->name('sesiabsen.')->group(function () {
-            Route::get('/{sesiAbsen}/items', [SesiAbsenController::class, 'items'])
-                ->name('items');
         });
 
         /*
@@ -167,6 +163,9 @@ Route::delete('/scan-paspor/{passportScan}', [ScanPasporController::class, 'dest
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::get('notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
         Route::post('notifications/send', [NotificationController::class, 'sendNotification'])->name('notifications.send');
+        Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])
+        ->name('notifications.destroy');
+
 
         /*
         | TUGAS (WIZARD)
@@ -197,14 +196,15 @@ Route::delete('/scan-paspor/{passportScan}', [ScanPasporController::class, 'dest
             Route::get('/{task}', [ChecklistTaskController::class, 'show'])->name('show');
             Route::get('/{task}/hasil', [ChecklistTaskController::class, 'result'])->name('result');
 
-             // ⬇️ INI YANG DITAMBAHKAN
-            Route::get( '/{task}/hasil/{submission}',
+            // ⬇️ INI YANG DITAMBAHKAN
+            Route::get(
+                '/{task}/hasil/{submission}',
                 [ChecklistTaskController::class, 'hasilDetail']
-                )->name('hasil.detail');
+            )->name('hasil.detail');
         });
 
 
-         // ===============================
+        // ===============================
         // ITINERARY KOTA (FIXED)
         // ===============================
         Route::prefix('itinerary/kota')->name('itinerary.kota.')->group(function () {
@@ -267,5 +267,17 @@ Route::delete('/scan-paspor/{passportScan}', [ScanPasporController::class, 'dest
         */
         Route::get('/attendances', [AdminAttendanceController::class, 'index'])
             ->name('attendances.index');
+
+        Route::delete(
+            '/attendances/{id}',
+            [AdminAttendanceController::class, 'destroy']
+        )
+            ->name('attendances.destroy');
+        
+        Route::get('/absensi-muthawif', [AbsenMuthawifController::class, 'index'])
+        ->name('absensi.muthawif.index');
+
+    Route::delete('/absensi-muthawif/{id}', [AbsenMuthawifController::class, 'destroy'])
+        ->name('absensi.muthawif.destroy');
     });
 });

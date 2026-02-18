@@ -284,6 +284,29 @@ public function update(Request $request, Itinerary $itinerary)
         ->route('admin.itinerary.edit', $itinerary)
         ->with('ok', 'Itinerary & Tour Leader berhasil diperbarui.');
 }
+// ======================================================
+// DELETE
+// ======================================================
+public function destroy(Itinerary $itinerary): RedirectResponse
+{
+    DB::transaction(function () use ($itinerary) {
+        // Hapus relasi TL dulu (kalau pakai pivot)
+        $itinerary->tourLeaders()->detach();
+
+        // Hapus semua item & day (kalau belum pakai cascade)
+        foreach ($itinerary->days as $day) {
+            $day->items()->delete();
+        }
+
+        $itinerary->days()->delete();
+
+        $itinerary->delete();
+    });
+
+    return redirect()
+        ->route('admin.itinerary.index')
+        ->with('ok', 'Itinerary berhasil dihapus.');
+}
 
 
 }

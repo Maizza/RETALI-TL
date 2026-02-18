@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -20,36 +21,45 @@ class CityController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:100|unique:cities,name']);
+        $request->validate([
+            'names' => 'required|array|min:1',
+            'names.*' => 'required|string|max:100|distinct|unique:cities,name'
+        ]);
 
-        City::create(['name' => $request->name]);
+        foreach ($request->names as $name) {
+            City::create([
+                'name' => $name
+            ]);
+        }
 
-        return redirect()->route('admin.itinerary.kota.index')->with('ok', 'Kota berhasil ditambahkan');
+        return redirect()
+            ->route('admin.itinerary.kota.index')
+            ->with('ok', 'Kota berhasil ditambahkan');
     }
 
-   public function edit($id)
-{
-    $city = City::findOrFail($id);
-    return view('admin.itinerary.kota.edit', compact('city'));
-}
 
-public function update(Request $request, $id)
-{
-    $city = City::findOrFail($id);
-    $request->validate([
-        'name' => 'required|string|max:100|unique:cities,name,' . $id
-    ]);
-    $city->update(['name' => $request->name]);
+    public function edit($id)
+    {
+        $city = City::findOrFail($id);
+        return view('admin.itinerary.kota.edit', compact('city'));
+    }
 
-    return redirect()->route('admin.itinerary.kota.index')->with('ok', 'Kota berhasil diperbarui');
-}
+    public function update(Request $request, $id)
+    {
+        $city = City::findOrFail($id);
+        $request->validate([
+            'name' => 'required|string|max:100|unique:cities,name,' . $id
+        ]);
+        $city->update(['name' => $request->name]);
 
-public function destroy($id)
-{
-    $city = City::findOrFail($id);
-    $city->delete();
+        return redirect()->route('admin.itinerary.kota.index')->with('ok', 'Kota berhasil diperbarui');
+    }
 
-    return redirect()->route('admin.itinerary.kota.index')->with('ok', 'Kota berhasil dihapus');
-}
+    public function destroy($id)
+    {
+        $city = City::findOrFail($id);
+        $city->delete();
 
+        return redirect()->route('admin.itinerary.kota.index')->with('ok', 'Kota berhasil dihapus');
+    }
 }

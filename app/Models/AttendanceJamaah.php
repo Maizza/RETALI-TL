@@ -9,14 +9,14 @@ class AttendanceJamaah extends Model
     protected $table = 'attendance_jamaah';
 
     protected $fillable = [
-    'jamaah_id',
-    'absensi_jamaah_id',
-    'absen_ke', // ⬅️ WAJIB
-    'tanggal',
-    'status',
-    'catatan',
-    'created_by',
-];
+        'jamaah_id',
+        'absensi_jamaah_id',
+        'absen_ke',
+        'tanggal',
+        'status',
+        'catatan',
+        'created_by',
+    ];
 
     protected $casts = [
         'tanggal' => 'date',

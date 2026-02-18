@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -63,32 +64,50 @@ class SesiAbsenController extends Controller
     // UPDATE
     // =========================
     public function update(Request $request, SesiAbsen $sesiAbsen)
-{
-    $request->validate([
-        'judul' => 'required|string|max:255',
-        'items' => 'required|array|min:1',
-        'items.*.id' => 'required|exists:sesi_absen_items,id',
-        'items.*.isi' => 'required|string|max:255',
-    ]);
+    {
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
+            'items.*.isi' => 'required|string|max:255',
+        ]);
 
-    // update judul sesi
-    $sesiAbsen->update([
-        'judul' => $request->judul,
-    ]);
+        $sesiAbsen->update([
+            'judul' => $request->judul,
+        ]);
 
-    // update item TANPA delete
-    foreach ($request->items as $item) {
-        SesiAbsenItem::where('id', $item['id'])
-            ->where('sesi_absen_id', $sesiAbsen->id)
-            ->update([
-                'isi' => $item['isi'],
-            ]);
+        $existingIds = $sesiAbsen->items()->pluck('id')->toArray();
+        $submittedIds = [];
+
+        foreach ($request->items as $item) {
+
+            if (isset($item['id'])) {
+                // UPDATE existing
+                SesiAbsenItem::where('id', $item['id'])
+                    ->where('sesi_absen_id', $sesiAbsen->id)
+                    ->update([
+                        'isi' => $item['isi'],
+                    ]);
+
+                $submittedIds[] = $item['id'];
+            } else {
+                // CREATE new
+                $new = $sesiAbsen->items()->create([
+                    'isi' => $item['isi'],
+                ]);
+
+                $submittedIds[] = $new->id;
+            }
+        }
+
+        // DELETE yang tidak dikirim
+        $toDelete = array_diff($existingIds, $submittedIds);
+
+        SesiAbsenItem::whereIn('id', $toDelete)->delete();
+
+        return redirect()
+            ->route('admin.sesiabsen.index')
+            ->with('success', 'Sesi absen berhasil diperbarui');
     }
-
-    return redirect()
-        ->route('admin.sesiabsen.index')
-        ->with('success', 'Sesi absen berhasil diperbarui (jamaah tetap aman)');
-}
 
     // =========================
     // DELETE
@@ -101,14 +120,13 @@ class SesiAbsenController extends Controller
             ->with('success', 'Sesi absen berhasil dihapus');
     }
 
-  public function items(SesiAbsen $sesiAbsen)
-{
-    return response()->json(
-        $sesiAbsen->items()
-            ->select('id', 'isi')
-            ->orderBy('isi')
-            ->get()
-    );
-}
-
+    public function items(SesiAbsen $sesiAbsen)
+    {
+        return response()->json(
+            $sesiAbsen->items()
+                ->select('id', 'isi')
+                ->orderBy('isi')
+                ->get()
+        );
+    }
 }

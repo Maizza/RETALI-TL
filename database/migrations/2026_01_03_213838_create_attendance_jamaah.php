@@ -8,39 +8,39 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('attendance_jamaah', function (Blueprint $table) {
-    $table->id();
+            $table->id();
 
-    $table->foreignId('jamaah_id')
-        ->constrained('jamaahs')
-        ->cascadeOnDelete();
+            $table->foreignId('jamaah_id')
+                ->constrained('jamaahs')
+                ->cascadeOnDelete();
 
-    $table->foreignId('absensi_jamaah_id')
-        ->constrained('absensi_jamaah')
-        ->cascadeOnDelete();
+            $table->foreignId('absensi_jamaah_id')
+                ->constrained('absensi_jamaah')
+                ->cascadeOnDelete();
 
-    // 🔑 PENTING UNTUK ABSEN BERULANG
-    $table->unsignedInteger('absen_ke')->default(1);
+            $table->unsignedInteger('absen_ke')->default(1);
 
-    $table->date('tanggal')->index();
+            $table->date('tanggal')->index();
 
-    $table->enum('status', [
-        'BELUM_ABSEN',
-        'HADIR',
-        'TIDAK_HADIR'
-    ]);
+            $table->enum('status', [
+                'BELUM_ABSEN',
+                'HADIR',
+                'TIDAK_HADIR'
+            ]);
 
-    $table->text('catatan')->nullable();
+            $table->text('catatan')->nullable();
 
-    $table->foreignId('created_by')
-        ->nullable()
-        ->constrained('tour_leaders')
-        ->nullOnDelete();
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('tour_leaders')
+                ->nullOnDelete();
 
-    $table->timestamps();
+            $table->timestamps();
 
-    // ❌ JANGAN UNIQUE jamaah_id + absensi_jamaah_id
-});
-
+            // 🔥 INI WAJIB UNTUK PERFORMA
+            $table->index(['jamaah_id', 'absensi_jamaah_id']);
+            $table->index(['absensi_jamaah_id', 'created_by']);
+        });
     }
 
     public function down(): void

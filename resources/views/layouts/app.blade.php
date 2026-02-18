@@ -60,14 +60,16 @@
             z-index: 1000;
             position: fixed;
             height: 100vh;
-            overflow: hidden; /* Diubah dari auto ke hidden */
+            overflow: hidden;
+            /* Diubah dari auto ke hidden */
             transition: var(--transition);
         }
 
         /* Area menu yang bisa discroll */
         .sidebar-menu-scroll {
             flex: 1;
-            overflow-y: auto; /* Hanya bagian ini yang bisa discroll */
+            overflow-y: auto;
+            /* Hanya bagian ini yang bisa discroll */
             padding-bottom: 20px;
         }
 
@@ -94,7 +96,8 @@
             padding: 28px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             background: rgba(0, 0, 0, 0.1);
-            flex-shrink: 0; /* Header tidak mengecil */
+            flex-shrink: 0;
+            /* Header tidak mengecil */
         }
 
         .sidebar-brand {
@@ -217,7 +220,8 @@
             margin-top: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.12);
             background: rgba(0, 0, 0, 0.1);
-            flex-shrink: 0; /* Footer tidak mengecil */
+            flex-shrink: 0;
+            /* Footer tidak mengecil */
         }
 
         .user-info {
@@ -580,6 +584,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -648,7 +653,7 @@
                 <!-- Dashboard -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}"
-                       href="{{ route('dashboard') }}">
+                        href="{{ route('dashboard') }}">
                         <i class="fas fa-chart-line"></i>
                         <span>Dashboard</span>
                     </a>
@@ -657,22 +662,22 @@
                 <!-- Pengguna -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('pengguna*', 'tourleaders*') ? 'active' : '' }}"
-                    href="#penggunaSubmenu" data-bs-toggle="collapse"
-                    aria-expanded="{{ request()->is('pengguna*', 'tourleaders*') ? 'true' : 'false' }}">
+                        href="#penggunaSubmenu" data-bs-toggle="collapse"
+                        aria-expanded="{{ request()->is('pengguna*', 'tourleaders*') ? 'true' : 'false' }}">
                         <i class="fas fa-users"></i>
                         <span>Pengguna</span>
                         <i class="fas fa-chevron-down ms-auto"></i>
                     </a>
                     <div class="collapse {{ request()->is('pengguna*', 'tourleaders*') ? 'show' : '' }}"
-                         id="penggunaSubmenu">
+                        id="penggunaSubmenu">
                         <div class="submenu">
                             <a href="{{ route('tourleaders.index') }}"
-                               class="submenu-item {{ request()->is('tourleaders*') ? 'active' : '' }}">
+                                class="submenu-item {{ request()->is('tourleaders*') ? 'active' : '' }}">
                                 <i class="fas fa-user-tie"></i>
                                 Tour Leader
                             </a>
                             <a href="{{ route('muthawif.index') }}"
-                               class="submenu-item {{ request()->is('pengguna/mutowif*') ? 'active' : '' }}">
+                                class="submenu-item {{ request()->is('pengguna/mutowif*') ? 'active' : '' }}">
                                 <i class="fas fa-user-check"></i>
                                 Muthawif
                             </a>
@@ -682,9 +687,8 @@
 
                 <!-- Tugas -->
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('tugas*') ? 'active' : '' }}"
-                    href="#tugasSubmenu" data-bs-toggle="collapse"
-                    aria-expanded="{{ request()->is('tugas*') ? 'true' : 'false' }}">
+                    <a class="nav-link {{ request()->is('tugas*') ? 'active' : '' }}" href="#tugasSubmenu"
+                        data-bs-toggle="collapse" aria-expanded="{{ request()->is('tugas*') ? 'true' : 'false' }}">
                         <i class="fas fa-tasks"></i>
                         <span>Tugas</span>
                         <i class="fas fa-chevron-down ms-auto"></i>
@@ -692,12 +696,12 @@
                     <div class="collapse {{ request()->is('tugas*') ? 'show' : '' }}" id="tugasSubmenu">
                         <div class="submenu">
                             <a href="{{ route('admin.tasks.index') }}"
-                               class="submenu-item {{ request()->is('admin/tugas*') ? 'active' : '' }}">
+                                class="submenu-item {{ request()->is('admin/tugas*') ? 'active' : '' }}">
                                 <i class="fas fa-user-cog"></i>
                                 Tugas Tourleader
                             </a>
                             <a href="{{ route('admin.ceklis.index') }}"
-                               class="submenu-item {{ request()->is('tugas/ceklis*') ? 'active' : '' }}">
+                                class="submenu-item {{ request()->is('tugas/ceklis*') ? 'active' : '' }}">
                                 <i class="fas fa-clipboard-check"></i>
                                 Tugas Ceklis
                             </a>
@@ -708,34 +712,34 @@
                 <!-- Itinerary -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.itineraries.*') ? 'active' : '' }}"
-                     href="#itinerarySubmenu"
-                     data-bs-toggle="collapse"
-                     aria-expanded="{{ request()->routeIs('admin.itineraries.*') ? 'true' : 'false' }}">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <span>Itinerary</span>
-                    <i class="fas fa-chevron-down ms-auto"></i>
-                  </a>
+                        href="#itinerarySubmenu" data-bs-toggle="collapse"
+                        aria-expanded="{{ request()->routeIs('admin.itineraries.*') ? 'true' : 'false' }}">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Itinerary</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </a>
 
-                  <div class="collapse {{ request()->routeIs('admin.itinerary.*') ? 'show' : '' }}" id="itinerarySubmenu">
-                    <div class="submenu">
-                      <a href="{{ route('admin.itinerary.index') }}"
-                         class="submenu-item {{ request()->routeIs('admin.itinerary.index') ? 'active' : '' }}">
-                        <i class="fas fa-map"></i> Halaman Itinerary
-                      </a>
+                    <div class="collapse {{ request()->routeIs('admin.itinerary.*') ? 'show' : '' }}"
+                        id="itinerarySubmenu">
+                        <div class="submenu">
+                            <a href="{{ route('admin.itinerary.index') }}"
+                                class="submenu-item {{ request()->routeIs('admin.itinerary.index') ? 'active' : '' }}">
+                                <i class="fas fa-map"></i> Halaman Itinerary
+                            </a>
 
-                      <a href="{{ route('admin.itinerary.kota.index') }}"
-                         class="submenu-item {{ request()->routeIs('admin.itinerary.kota.index') ? 'active' : '' }}">
-                        <i class="fas fa-city"></i>
-                        Pilihan Kota
-                      </a>
+                            <a href="{{ route('admin.itinerary.kota.index') }}"
+                                class="submenu-item {{ request()->routeIs('admin.itinerary.kota.index') ? 'active' : '' }}">
+                                <i class="fas fa-city"></i>
+                                Pilihan Kota
+                            </a>
+                        </div>
                     </div>
-                  </div>
                 </li>
 
                 <!-- Kloter -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('kloter*') ? 'active' : '' }}"
-                       href="{{ route('kloter.index') }}">
+                        href="{{ route('kloter.index') }}">
                         <i class="fas fa-plane-departure"></i>
                         <span>Kloter</span>
                     </a>
@@ -744,68 +748,75 @@
                 <!-- Riwayat Absensi -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'active' : '' }}"
-                       href="#absensiSubmenu"
-                       data-bs-toggle="collapse"
-                       aria-expanded="{{ request()->is('admin/attendances*', 'admin/absensi*') ? 'true' : 'false' }}">
+                        href="#absensiSubmenu" data-bs-toggle="collapse"
+                        aria-expanded="{{ request()->is('admin/attendances*', 'admin/absensi*') ? 'true' : 'false' }}">
                         <i class="fas fa-user-clock"></i>
                         <span>Riwayat Absensi</span>
                         <i class="fas fa-chevron-down ms-auto"></i>
                     </a>
 
-                    <div class="collapse {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'show' : '' }}" id="absensiSubmenu">
+                    <div class="collapse {{ request()->is('admin/attendances*', 'admin/absensi*') ? 'show' : '' }}"
+                        id="absensiSubmenu">
                         <div class="submenu">
                             <!-- Absensi Tour Leader -->
                             <a href="{{ route('admin.attendances.index') }}"
-                               class="submenu-item {{ request()->is('admin/attendances*') ? 'active' : '' }}">
+                                class="submenu-item {{ request()->is('admin/attendances*') ? 'active' : '' }}">
                                 <i class="fas fa-user-tie"></i>
                                 Absensi Tour Leader
                             </a>
 
                             <!-- Absensi Jamaah -->
                             <a href="{{ route('jamaah.index') }}"
-                               class="submenu-item {{ request()->is('admin/jamaah*') ? 'active' : '' }}">
+                                class="submenu-item {{ request()->is('admin/jamaah*') ? 'active' : '' }}">
                                 <i class="fas fa-users"></i>
                                 Absensi Jamaah
+                            </a>
+
+                            <!-- Absensi Muthawif -->
+                            <a href="{{ route('admin.absensi.muthawif.index') }}"
+                                class="submenu-item {{ request()->is('admin/absensi-muthawif*') ? 'active' : '' }}">
+                                <i class="fas fa-user-check"></i>
+                                Absensi Muthawif
                             </a>
                         </div>
                     </div>
                 </li>
 
-               <!-- Riwayat Scan (Ubah dari link tunggal menjadi submenu) -->
-<li class="nav-item">
-    <a class="nav-link {{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'active' : '' }}"
-       href="#scanSubmenu"
-       data-bs-toggle="collapse"
-       aria-expanded="{{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'true' : 'false' }}">
-        <i class="fas fa-history"></i>
-        <span>Riwayat Scan</span>
-        <i class="fas fa-chevron-down ms-auto"></i>
-    </a>
+                <!-- Riwayat Scan (Ubah dari link tunggal menjadi submenu) -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'active' : '' }}"
+                        href="#scanSubmenu" data-bs-toggle="collapse"
+                        aria-expanded="{{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'true' : 'false' }}">
+                        <i class="fas fa-history"></i>
+                        <span>Riwayat Scan</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </a>
 
-    <div class="collapse {{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'show' : '' }}" id="scanSubmenu">
-        <div class="submenu">
-            <!-- Scan Koper -->
-            <a href="{{ route('scans.index') }}"
-               class="submenu-item {{ request()->is('scan/koper*') || request()->is('scans/koper*') ? 'active' : '' }}">
-                <i class="fas fa-suitcase-rolling"></i>
-                Scan Koper
-            </a>
+                    <div class="collapse {{ request()->is('scans*') || request()->is('admin/scans*') || request()->is('scan/koper*') || request()->is('scan/paspor*') ? 'show' : '' }}"
+                        id="scanSubmenu">
+                        <div class="submenu">
+                            <!-- Scan Koper -->
+                            <a href="{{ route('scans.index') }}"
+                                class="submenu-item {{ request()->is('scan/koper*') || request()->is('scans/koper*') ? 'active' : '' }}">
+                                <i class="fas fa-suitcase-rolling"></i>
+                                Scan Koper
+                            </a>
 
-            <!-- Scan Paspor -->
-            <a href="{{ route('scan-paspor.index') }}"
-               class="submenu-item {{ request()->is('scan-paspor*') ? 'active' : '' }}">
-                  <i class="fas fa-passport"></i>
-                  Scan Paspor
-            </a>
+                            <!-- Scan Paspor -->
+                            <a href="{{ route('scan-paspor.index') }}"
+                                class="submenu-item {{ request()->is('scan-paspor*') ? 'active' : '' }}">
+                                <i class="fas fa-passport"></i>
+                                Scan Paspor
+                            </a>
 
-        </div>
-    </div>
-</li>
+                        </div>
+                    </div>
+                </li>
 
                 <!-- Notifikasi -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('notifications*', 'admin/notifications*') ? 'active' : '' }}"
-                       href="{{ route('admin.notifications.index') }}">
+                        href="{{ route('admin.notifications.index') }}">
                         <i class="fas fa-bell"></i>
                         <span>Notifikasi</span>
                     </a>
@@ -850,9 +861,8 @@
         @yield('content')
     </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-   @stack('scripts')
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -888,4 +898,5 @@
         });
     </script>
 </body>
+
 </html>

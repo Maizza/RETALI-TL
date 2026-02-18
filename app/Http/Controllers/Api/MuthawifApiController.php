@@ -54,9 +54,8 @@ class MuthawifApiController extends Controller
                 'email'           => $muthawif->email,
                 'role'            => 'muthawif',
                 'kloter'          => optional($muthawif->kloter)->nama,
-                'kloter_tanggal'  => $muthawif->kloter
-                    ? $muthawif->kloter->tgl_berangkat . ' - ' . $muthawif->kloter->tgl_pulang
-                    : null,
+                'kloter_tanggal' => optional($muthawif->kloter)->tanggal,
+
             ],
         ], 200);
     }
@@ -79,9 +78,8 @@ class MuthawifApiController extends Controller
                 'email'           => $user->email,
                 'role'            => 'muthawif',
                 'kloter'          => optional($user->kloter)->nama,
-                'kloter_tanggal'  => $user->kloter
-                    ? $user->kloter->tgl_berangkat . ' - ' . $user->kloter->tgl_pulang
-                    : null,
+                'kloter_tanggal' => optional($user->kloter)->tanggal,
+
             ],
         ]);
     }

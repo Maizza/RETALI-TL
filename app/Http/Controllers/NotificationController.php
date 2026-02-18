@@ -81,18 +81,18 @@ class NotificationController extends Controller
 
         // 3️⃣ Payload FCM (WAJIB ada "notification")
         $payload = [
-    'message' => array_merge($target, [
-        'data' => [                         // ✅ DATA ONLY
-            'title' => $request->title,
-            'body'  => $request->message,
-            'type'  => 'general',
-            'notification_id' => (string) $notification->id,
-        ],
-        'android' => [
-            'priority' => 'high',
-        ],
-    ]),
-];
+            'message' => array_merge($target, [
+                'data' => [                         // ✅ DATA ONLY
+                    'title' => $request->title,
+                    'body'  => $request->message,
+                    'type'  => 'general',
+                    'notification_id' => (string) $notification->id,
+                ],
+                'android' => [
+                    'priority' => 'high',
+                ],
+            ]),
+        ];
 
 
         // 4️⃣ Kirim ke Firebase
@@ -112,5 +112,15 @@ class NotificationController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Notifikasi berhasil dikirim');
+    }
+
+    public function destroy($id)
+    {
+        $notif = Notification::findOrFail($id);
+        $notif->delete();
+
+        return redirect()
+            ->route('admin.notifications.index')
+            ->with('success', 'Notifikasi berhasil dihapus');
     }
 }

@@ -120,7 +120,7 @@ class ScanController extends Controller
                 'owner_name'  => $j['nama'] ?? null,
                 'owner_phone' => $j['phone'] ?? null,
                 'kloter'      => $j['kloter'] ?? null,
-            ], fn ($v) => filled($v));
+            ], fn($v) => filled($v));
         }
 
         $parts = array_map('trim', preg_split('/\||\r\n|\n|\r/', $raw));
@@ -137,5 +137,25 @@ class ScanController extends Controller
     {
         json_decode($s);
         return json_last_error() === JSON_ERROR_NONE;
+    }
+
+
+    public function destroy(Scan $scan)
+    {
+        $tourleaderId = auth('tourleader')->id();
+
+        if ($scan->tourleader_id !== $tourleaderId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        $scan->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Scan koper berhasil dihapus.'
+        ]);
     }
 }

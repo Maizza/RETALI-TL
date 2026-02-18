@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ChecklistSubmitController;
 use App\Http\Controllers\Api\ItineraryApiController;
 use App\Http\Controllers\Api\PassportScanController;
 use App\Http\Controllers\Api\MuthawifApiController;
+use App\Http\Controllers\Api\AbsenMuthawifController;
 
 
 // **ABSEN JAMAAH**
@@ -47,14 +48,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/scans', [ScanController::class, 'index']);
     Route::post('/scans', [ScanController::class, 'store']);
 
-     // ==================================================
+    // ==================================================
     // SCAN PASPOR (GLOBAL – 1 PASPOR = 1 SCAN)
     // ==================================================
     Route::post('/passport-scan', [PassportScanController::class, 'store']);
 
     Route::post(
-    '/tourleader/passport-scan',
-    [PassportScanController::class, 'store'] );
+        '/tourleader/passport-scan',
+        [PassportScanController::class, 'store']
+    );
 
 
 
@@ -89,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+
 // ======================================================
 // ===============  TOUR LEADER AUTH =====================
 // ======================================================
@@ -101,6 +104,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // SCAN
     Route::get('/tourleader/scans', [ScanController::class, 'index']);
     Route::post('/tourleader/scans', [ScanController::class, 'store']);
+    Route::delete('/tourleader/scans/{scan}', [ScanController::class, 'destroy']);
+
+    Route::get('/tourleader/passport-scans', [PassportScanController::class, 'index']);
+    Route::delete('/tourleader/passport-scans/{passportScan}', [PassportScanController::class, 'destroy']);
+
+
 
     // FCM TL
     Route::post('/tourleader/fcm-token', [FCMTokenController::class, 'store']);
@@ -112,26 +121,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tourleader/tasks/{task}/done', [TaskApiController::class, 'markDone']);
 
     // ===============================
-// TASK TL - PER SOAL (WAJIB)
-// ===============================
+    // TASK TL - PER SOAL (WAJIB)
+    // ===============================
 
-// Ambil status per soal (Sudah / Belum)
-Route::get(
-    '/tourleader/tasks/{task}/answers',
-    [TaskApiController::class, 'answers']
-);
+    // Ambil status per soal (Sudah / Belum)
+    Route::get(
+        '/tourleader/tasks/{task}/answers',
+        [TaskApiController::class, 'answers']
+    );
 
-// Tandai soal = Sudah
-Route::post(
-    '/tourleader/tasks/{task}/questions/{question}/answer',
-    [TaskApiController::class, 'answer']
-);
+    // Tandai soal = Sudah
+    Route::post(
+        '/tourleader/tasks/{task}/questions/{question}/answer',
+        [TaskApiController::class, 'answer']
+    );
 
-// Tandai soal = Belum
-Route::delete(
-    '/tourleader/tasks/{task}/questions/{question}/answer',
-    [TaskApiController::class, 'unanswer']
-);
+    // Tandai soal = Belum
+    Route::delete(
+        '/tourleader/tasks/{task}/questions/{question}/answer',
+        [TaskApiController::class, 'unanswer']
+    );
 
 
     // CHECKLIST TL
@@ -143,27 +152,32 @@ Route::delete(
     Route::get('/tourleader/itinerary', [ItineraryApiController::class, 'tlList']);
     Route::get('/tourleader/itinerary/{itinerary}', [ItineraryApiController::class, 'tlShow']);
 
-     // ======================================================
-// ABSENSI JAMAAH - PER JAMAAH (STATUS + CATATAN)
-// ======================================================
+    // ======================================================
+    // ABSENSI JAMAAH - PER JAMAAH (STATUS + CATATAN)
+    // ======================================================
 
-// LIST ABSEN (HOME)
-Route::get(
-    '/tourleader/attendance-jamaah',
-    [AttendanceJamaahController::class, 'index']
-);
+    // LIST ABSEN (HOME)
+    Route::get(
+        '/tourleader/attendance-jamaah',
+        [AttendanceJamaahController::class, 'index']
+    );
 
-// DETAIL ABSEN + LIST JAMAAH  ⬅️ WAJIB ADA
-Route::get(
-    '/tourleader/attendance-jamaah/{id}',
-    [AttendanceJamaahController::class, 'show']
-);
+    // DETAIL ABSEN + LIST JAMAAH  ⬅️ WAJIB ADA
+    Route::get(
+        '/tourleader/attendance-jamaah/{id}',
+        [AttendanceJamaahController::class, 'show']
+    );
 
-// UPDATE STATUS + CATATAN
-Route::post(
-    '/tourleader/attendance-jamaah',
-    [AttendanceJamaahController::class, 'update']
-);
+    // UPDATE STATUS + CATATAN
+    Route::post(
+        '/tourleader/attendance-jamaah',
+        [AttendanceJamaahController::class, 'update']
+    );
+
+    Route::post(
+        '/tourleader/attendance-jamaah/bulk',
+        [AttendanceJamaahController::class, 'bulkUpdate']
+    );
 
     // ======================================================
     // ========== ABSENSI TOUR LEADER (ABSEN DIRI SENDIRI) ==
@@ -171,18 +185,22 @@ Route::post(
     // ABSENSI TOUR LEADER (ABSEN DIRI SENDIRI)
     Route::post('/tourleader/attendance', [AttendanceController::class, 'store']);  // <= WAJIB ADA
     Route::get('/tourleader/attendance', [AttendanceController::class, 'myHistory']);
-
-
-
-    //MUTHAWIF
-
-    Route::prefix('muthawif')->group(function () {
-    Route::post('/login', [MuthawifApiController::class, 'login']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/profile', [MuthawifApiController::class, 'profile']);
-        Route::post('/logout', [MuthawifApiController::class, 'logout']);
-    });
-
 });
+
+
+// ======================
+// MUTHAWIF LOGIN
+// ======================
+Route::post('/muthawif/login', [MuthawifApiController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/muthawif/profile', [MuthawifApiController::class, 'profile']);
+    Route::post('/muthawif/logout', [MuthawifApiController::class, 'logout']);
+
+    
+    Route::post('/muthawif/attendance', [AbsenMuthawifController::class, 'store']);
+    Route::get('/muthawif/attendance', [AbsenMuthawifController::class, 'history']);
 });
+
+

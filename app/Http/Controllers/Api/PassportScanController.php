@@ -14,6 +14,32 @@ class PassportScanController extends Controller
      * STORE PASSPORT SCAN
      * =============================
      */
+
+    public function index()
+    {
+        $tourleaderId = auth('tourleader')->id();
+
+        if (!$tourleaderId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $scans = PassportScan::where('tourleader_id', $tourleaderId)
+            ->latest('scanned_at')
+            ->get([
+                'id',
+                'passport_number',
+                'owner_name',
+                'owner_phone',
+                'kloter',
+                'scanned_at'
+            ]);
+
+        return response()->json($scans);
+    }
+
     public function store(Request $request)
     {
         // =============================
@@ -163,5 +189,24 @@ class PassportScanController extends Controller
     {
         json_decode($s);
         return json_last_error() === JSON_ERROR_NONE;
+    }
+
+    public function destroy(PassportScan $passportScan)
+    {
+        $tourleaderId = auth('tourleader')->id();
+
+        if ($passportScan->tourleader_id !== $tourleaderId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        $passportScan->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Scan paspor berhasil dihapus.'
+        ]);
     }
 }

@@ -26,6 +26,7 @@
                 {{ $absen->sesiAbsenItem->isi }}
             </div>
 
+            
             <div class="text-muted">
                 Jumlah Jamaah:
                 <strong>{{ $jamaah->total() }}</strong>
@@ -61,29 +62,27 @@
                 <tbody>
                 @forelse($jamaah as $i => $j)
                     @php
-                        // 🔑 AMBIL ABSENSI TERAKHIR SESUAI ABSEN INI
-                        $attendance = $j->attendance()
-                            ->where('absensi_jamaah_id', $absen->id)
-                            ->orderByDesc('absen_ke')
-                            ->first();
-
+                        // ✅ PAKAI RELASI YANG BENAR
+                        $attendance = $j->latestAttendance;
                         $status = $attendance->status ?? 'BELUM_ABSEN';
                     @endphp
 
                     <tr>
-                        <td>{{ $jamaah->firstItem() + $i }}</td>
+                        {{-- nomor urut paging --}}
+                        <td>{{ $j->urutan_absen }}</td>
+
                         <td>{{ $j->nama_jamaah }}</td>
-                        <td>{{ $j->no_paspor }}</td>
-                        <td>{{ $j->no_hp }}</td>
-                        <td>{{ $j->jenis_kelamin }}</td>
+                        <td>{{ $j->no_paspor ?? '-' }}</td>
+                        <td>{{ $j->no_hp ?? '-' }}</td>
+                        <td>{{ $j->jenis_kelamin ?? '-' }}</td>
                         <td>
                             {{ $j->tanggal_lahir
                                 ? $j->tanggal_lahir->format('d-m-Y')
                                 : '-' }}
                         </td>
-                        <td>{{ $j->kode_kloter }}</td>
-                        <td>{{ $j->nomor_bus }}</td>
-                        <td>{{ $j->keterangan }}</td>
+                        <td>{{ $j->kode_kloter ?? '-' }}</td>
+                        <td>{{ $j->nomor_bus ?? '-' }}</td>
+                        <td>{{ $j->keterangan ?? '-' }}</td>
 
                         {{-- STATUS --}}
                         <td>
@@ -126,11 +125,7 @@
     {{-- ================= MODAL CATATAN ================= --}}
     @foreach($jamaah as $j)
         @php
-            $attendance = $j->attendance()
-                ->where('absensi_jamaah_id', $absen->id)
-                ->orderByDesc('absen_ke')
-                ->first();
-
+            $attendance = $j->latestAttendance;
             $status = $attendance->status ?? 'BELUM_ABSEN';
         @endphp
 

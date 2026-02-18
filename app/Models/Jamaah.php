@@ -9,6 +9,7 @@ class Jamaah extends Model
     protected $fillable = [
         'absen_id',
         'assigned_tourleader_id',
+        'urutan_absen', // 🔑 WAJIB
         'nama_jamaah',
         'no_paspor',
         'no_hp',
@@ -19,9 +20,10 @@ class Jamaah extends Model
         'keterangan',
     ];
 
-    protected $casts = [
+     protected $casts = [
         'tanggal_lahir' => 'date',
     ];
+    /* ================= RELATIONS ================= */
 
     public function absen()
     {
@@ -33,15 +35,14 @@ class Jamaah extends Model
         return $this->belongsTo(TourLeader::class, 'assigned_tourleader_id');
     }
 
-    public function attendance()
+    public function attendances()
     {
         return $this->hasMany(AttendanceJamaah::class, 'jamaah_id');
     }
 
     public function latestAttendance()
-{
-    return $this->hasOne(AttendanceJamaah::class, 'jamaah_id')
-        ->latest('absen_ke');
-}
-
+    {
+        return $this->hasOne(AttendanceJamaah::class, 'jamaah_id')
+            ->latestOfMany('absen_ke');
+    }
 }
