@@ -65,7 +65,8 @@ class ChecklistTaskController extends Controller
     public function createStep2()
     {
         $s1 = Session::get('ceklis_step1');
-        if (!$s1) return redirect()->route('admin.ceklis.create.step1');
+        if (!$s1)
+            return redirect()->route('admin.ceklis.create.step1');
 
         $allKloters = Kloter::all();
         $allTourLeaders = TourLeader::all();
@@ -76,7 +77,8 @@ class ChecklistTaskController extends Controller
     public function storeStep2(Request $request)
     {
         $s1 = Session::get('ceklis_step1');
-        if (!$s1) return redirect()->route('admin.ceklis.create.step1');
+        if (!$s1)
+            return redirect()->route('admin.ceklis.create.step1');
 
         // ✅ Ambil otomatis semua kloter dari profil Tour Leader
         $kloterIds = TourLeader::pluck('kloter_id')->unique()->filter()->toArray();
@@ -115,7 +117,8 @@ class ChecklistTaskController extends Controller
     {
         $s1 = Session::get('ceklis_step1');
         $s2 = Session::get('ceklis_step2');
-        if (!$s1 || !$s2) return redirect()->route('admin.ceklis.create.step1');
+        if (!$s1 || !$s2)
+            return redirect()->route('admin.ceklis.create.step1');
 
         $selectedKloters = Kloter::whereIn('id', $s2['kloter_ids'])->get();
         $selectedTourLeaders = TourLeader::whereIn('id', $s2['tourleader_ids'] ?? [])->get();
@@ -129,7 +132,8 @@ class ChecklistTaskController extends Controller
     {
         $s1 = Session::get('ceklis_step1');
         $s2 = Session::get('ceklis_step2');
-        if (!$s1 || !$s2) return redirect()->route('admin.ceklis.create.step1');
+        if (!$s1 || !$s2)
+            return redirect()->route('admin.ceklis.create.step1');
 
         DB::beginTransaction();
         try {
@@ -197,31 +201,45 @@ class ChecklistTaskController extends Controller
     }
 
     public function hasilDetail(ChecklistTask $task, ChecklistSubmission $submission)
-{
-    // Pastikan submission memang milik task ini
-    if ($submission->checklist_task_id !== $task->id) {
-        abort(404);
+    {
+        // Pastikan submission memang milik task ini
+        if ($submission->checklist_task_id !== $task->id) {
+            abort(404);
+        }
+
+        // Load relasi yang dibutuhkan (sekali query, bersih)
+        $submission->load([
+            'tourleader',
+            'answers.question' => function ($q) {
+                $q->orderBy('order_no');
+            }
+        ]);
+
+        // Mapping label status (untuk tampilan web)
+        $statusLabels = [
+            'sudah' => 'Sudah',
+            'tidak' => 'Tidak terpenuhi',
+            'rekan' => 'Dikerjakan oleh rekan',
+        ];
+
+        return view('admin.ceklis.hasil-detail', [
+            'task' => $task,
+            'submission' => $submission,
+            'statusLabels' => $statusLabels,
+        ]);
     }
 
-    // Load relasi yang dibutuhkan (sekali query, bersih)
-    $submission->load([
-        'tourleader',
-        'answers.question' => function ($q) {
-            $q->orderBy('order_no');
+    public function destroy(ChecklistTask $task)
+    {
+        try {
+            // Hapus task (pastikan di migrasi database sudah pakai ->onDelete('cascade'))
+            // Jika belum cascade manual, hapus relasi di sini dulu.
+            $task->delete();
+
+            return redirect()->route('admin.ceklis.index')
+                ->with('success', 'Tugas ceklis berhasil dihapus.');
+        } catch (\Throwable $th) {
+            return back()->with('error', 'Gagal menghapus tugas: ' . $th->getMessage());
         }
-    ]);
-
-    // Mapping label status (untuk tampilan web)
-    $statusLabels = [
-        'sudah' => 'Sudah',
-        'tidak' => 'Tidak terpenuhi',
-        'rekan' => 'Dikerjakan oleh rekan',
-    ];
-
-    return view('admin.ceklis.hasil-detail', [
-        'task'          => $task,
-        'submission'    => $submission,
-        'statusLabels'  => $statusLabels,
-    ]);
-}
+    }
 }

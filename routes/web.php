@@ -164,7 +164,7 @@ Route::middleware('auth:web')->group(function () {
         Route::get('notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
         Route::post('notifications/send', [NotificationController::class, 'sendNotification'])->name('notifications.send');
         Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])
-        ->name('notifications.destroy');
+            ->name('notifications.destroy');
 
 
         /*
@@ -178,8 +178,10 @@ Route::middleware('auth:web')->group(function () {
             Route::post('/create/soal', [TaskWizardController::class, 'storeStep2'])->name('store.step2');
             Route::get('/{task}', [TaskWizardController::class, 'show'])->name('show');
             Route::get('/{task}/hasil', [TaskResultController::class, 'show'])->name('result');
-
             Route::get('/{task}/hasil/{tourleader}', [TaskResultController::class, 'detail'])->name('result.detail');
+
+            // Tambahkan baris ini
+            Route::delete('/{task}', [TaskWizardController::class, 'destroy'])->name('destroy');
         });
 
         /*
@@ -192,15 +194,15 @@ Route::middleware('auth:web')->group(function () {
             Route::get('/create/soal', [ChecklistTaskController::class, 'createStep2'])->name('create.step2');
             Route::post('/create/soal', [ChecklistTaskController::class, 'storeStep2'])->name('store.step2');
             Route::get('/create/konfirmasi', [ChecklistTaskController::class, 'createStep3'])->name('create.step3');
+            // Jika storeFinal butuh POST khusus, pastikan ini ada:
             Route::post('/create/konfirmasi', [ChecklistTaskController::class, 'storeFinal'])->name('store.final');
+
             Route::get('/{task}', [ChecklistTaskController::class, 'show'])->name('show');
             Route::get('/{task}/hasil', [ChecklistTaskController::class, 'result'])->name('result');
+            Route::get('/{task}/hasil/{submission}', [ChecklistTaskController::class, 'hasilDetail'])->name('hasil.detail');
 
-            // ⬇️ INI YANG DITAMBAHKAN
-            Route::get(
-                '/{task}/hasil/{submission}',
-                [ChecklistTaskController::class, 'hasilDetail']
-            )->name('hasil.detail');
+            // Route Delete yang ditambahkan
+            Route::delete('/{task}', [ChecklistTaskController::class, 'destroy'])->name('destroy');
         });
 
 
@@ -273,11 +275,11 @@ Route::middleware('auth:web')->group(function () {
             [AdminAttendanceController::class, 'destroy']
         )
             ->name('attendances.destroy');
-        
-        Route::get('/absensi-muthawif', [AbsenMuthawifController::class, 'index'])
-        ->name('absensi.muthawif.index');
 
-    Route::delete('/absensi-muthawif/{id}', [AbsenMuthawifController::class, 'destroy'])
-        ->name('absensi.muthawif.destroy');
+        Route::get('/absensi-muthawif', [AbsenMuthawifController::class, 'index'])
+            ->name('absensi.muthawif.index');
+
+        Route::delete('/absensi-muthawif/{id}', [AbsenMuthawifController::class, 'destroy'])
+            ->name('absensi.muthawif.destroy');
     });
 });

@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container py-4" style="max-width: 950px">
-  <!-- Header -->
   <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
     <h4 class="fw-bold mb-0 text-dark">
       <i class="bi bi-list-task me-2 text-primary"></i> Daftar Tugas Tour Leader
@@ -12,7 +11,6 @@
     </a>
   </div>
 
-  <!-- Alert -->
   @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
       <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -20,9 +18,15 @@
     </div>
   @endif
 
-  <!-- Daftar Tugas -->
+  @if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  @endif
+
   @forelse ($tasks as $task)
-    <div class="card shadow-sm border-0 mb-3 rounded-4">
+    <div class="card shadow-sm border-0 mb-3 rounded-4 hover-shadow">
       <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
           <h5 class="fw-semibold mb-1 text-dark">{{ $task->title }}</h5>
@@ -39,7 +43,7 @@
             'dibuka'       => ['class' => 'bg-success text-white', 'icon' => 'bi-unlock', 'label' => 'Sedang dibuka'],
             'ditutup'      => ['class' => 'bg-danger text-white', 'icon' => 'bi-lock-fill', 'label' => 'Sudah ditutup'],
           ];
-          $status = $task->status;
+          $status = $task->status; // Pastikan model Task memiliki accessor getStatusAttribute
         @endphp
 
         <div class="d-flex align-items-center gap-2">
@@ -52,6 +56,16 @@
           <a href="{{ route('admin.tasks.result', $task) }}" class="btn btn-dark btn-sm rounded-pill">
             <i class="bi bi-clipboard-check me-1"></i> Hasil
           </a>
+
+          <form action="{{ route('admin.tasks.destroy', $task) }}" method="POST"
+                onsubmit="return confirm('Apakah Anda yakin ingin menghapus tugas ini? Semua data soal dan jawaban akan dihapus permanen.');"
+                style="display: inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
+              <i class="bi bi-trash me-1"></i> Hapus
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -61,9 +75,16 @@
     </div>
   @endforelse
 
-  <!-- Pagination -->
   <div class="mt-4 d-flex justify-content-center">
     {{ $tasks->links() }}
   </div>
 </div>
+
+<style>
+  .hover-shadow:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+    transition: all 0.2s ease-in-out;
+  }
+</style>
 @endsection

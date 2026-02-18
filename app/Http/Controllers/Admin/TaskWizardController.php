@@ -27,11 +27,11 @@ class TaskWizardController extends Controller
     public function storeStep1(Request $r)
     {
         $data = $r->validate([
-            'title'          => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'question_count' => ['required', 'integer', 'min:1', 'max:50'],
-            'opens_at'       => ['required', 'date'],
-            'closes_at'      => ['required', 'date', 'after:opens_at'],
-            'target_type'    => ['required', 'in:all,specific'],
+            'opens_at' => ['required', 'date'],
+            'closes_at' => ['required', 'date', 'after:opens_at'],
+            'target_type' => ['required', 'in:all,specific'],
         ]);
 
         session(['task_step1' => $data]);
@@ -40,22 +40,22 @@ class TaskWizardController extends Controller
 
     // STEP 2: form soal + pilih tour leader (kalau specific)
     public function createStep2()
-{
-    $s1 = session('task_step1');
-    abort_unless($s1, 302, 'Step 1 belum diisi.');
+    {
+        $s1 = session('task_step1');
+        abort_unless($s1, 302, 'Step 1 belum diisi.');
 
-    // ✅ Ambil tour leader hanya jika target_type = 'specific'
-    $tourLeaders = [];
-    if (($s1['target_type'] ?? '') === 'specific') {
-        // Pastikan hanya ambil kolom penting
-        $tourLeaders = \App\Models\TourLeader::select('id', 'name')->orderBy('name')->get();
+        // ✅ Ambil tour leader hanya jika target_type = 'specific'
+        $tourLeaders = [];
+        if (($s1['target_type'] ?? '') === 'specific') {
+            // Pastikan hanya ambil kolom penting
+            $tourLeaders = \App\Models\TourLeader::select('id', 'name')->orderBy('name')->get();
+        }
+
+        return view('admin.tugas_tourleader.create-step2', [
+            's1' => $s1,
+            'tourLeaders' => $tourLeaders,
+        ]);
     }
-
-    return view('admin.tugas_tourleader.create-step2', [
-        's1' => $s1,
-        'tourLeaders' => $tourLeaders,
-    ]);
-}
 
 
     public function storeStep2(Request $r)
@@ -78,31 +78,31 @@ class TaskWizardController extends Controller
         $data = $r->validate($rules);
 
         DB::transaction(function () use ($s1, $data, $r) {
-    // 1) buat tugas
-    $task = Task::create($s1);
+            // 1) buat tugas
+            $task = Task::create($s1);
 
-    // 2) simpan soal
-    foreach ($data['questions'] as $idx => $text) {
-        TaskQuestion::create([
-            'task_id'       => $task->id,
-            'order_no'      => $idx + 1,
-            'question_text' => $text,
-        ]);
-    }
+            // 2) simpan soal
+            foreach ($data['questions'] as $idx => $text) {
+                TaskQuestion::create([
+                    'task_id' => $task->id,
+                    'order_no' => $idx + 1,
+                    'question_text' => $text,
+                ]);
+            }
 
-    // 3) assign ke tour leader
-    if ($s1['target_type'] === 'all') {
-        // Semua TL
-        $tourleaders = \App\Models\TourLeader::pluck('id');
-        $task->tourleaders()->attach($tourleaders->all());
-    } else {
-        // Tertentu (yang dicentang di step 2)
-        $selected = $r->input('tour_leaders', []);
-        if (!empty($selected)) {
-            $task->tourleaders()->attach($selected);
-        }
-    }
-});
+            // 3) assign ke tour leader
+            if ($s1['target_type'] === 'all') {
+                // Semua TL
+                $tourleaders = \App\Models\TourLeader::pluck('id');
+                $task->tourleaders()->attach($tourleaders->all());
+            } else {
+                // Tertentu (yang dicentang di step 2)
+                $selected = $r->input('tour_leaders', []);
+                if (!empty($selected)) {
+                    $task->tourleaders()->attach($selected);
+                }
+            }
+        });
 
 
         session()->forget('task_step1');
@@ -116,5 +116,31 @@ class TaskWizardController extends Controller
     {
         $task->load('questions');
         return view('admin.tugas_tourleader.show', compact('task'));
+    }
+
+    public function destroy(Task $task)
+    {
+        DB::beginTransaction();
+        try {
+            // 1. Hapus relasi di tabel pivot (tour leaders yang ditugaskan)
+            $task->tourleaders()->detach();
+
+            // 2. Hapus soal-soal terkait
+            $task->questions()->delete();
+
+            // 3. Hapus hasil pengerjaan jika ada (asumsi relasi bernama 'results')
+            if (method_exists($task, 'results')) {
+                $task->results()->delete();
+            }
+
+            // 4. Hapus tugas utama
+            $task->delete();
+
+            DB::commit();
+            return redirect()->route('admin.tasks.index')->with('success', 'Tugas Tour Leader berhasil dihapus.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menghapus tugas: ' . $th->getMessage());
+        }
     }
 }
