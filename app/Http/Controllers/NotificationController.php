@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Notification;
-use App\Models\Tourleader; // Model TL lu
-use App\Models\Muthawif;   // Model Muthawif lu
+use App\Models\Tourleader;
+use App\Models\Muthawif;
 use App\Mail\ReportMasukMail;
 use Google\Client as GoogleClient;
 
@@ -45,7 +45,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Kirim Notifikasi ke SEMUA Tour Leader & Muthawif
+     * Kirim Notifikasi Broadcast (Anti-Duplikat di Admin)
      */
     public function sendNotification(Request $request)
     {
@@ -54,48 +54,62 @@ class NotificationController extends Controller
             'message' => 'required|string',
         ]);
 
-        // 1. Ambil semua data dari kedua tabel
+        // 1. Ambil semua data target
         $tourleaders = Tourleader::all();
         $muthawifs = Muthawif::all();
 
         Log::info('--- Memulai Broadcast ke Semua TL & Muthawif ---');
 
-        // --- PROSES TOUR LEADERS ---
+        // 2. Simpan cuma 1 baris ke Database untuk riwayat Admin
+        // user_id 0 menandakan broadcast umum
+        $notification = Notification::create([
+            'user_id'   => 0,
+            'title'     => $request->title,
+            'message'   => $request->message,
+            'is_active' => true,
+        ]);
+
+        // 3. Looping kirim email ke Tour Leader
         foreach ($tourleaders as $tl) {
-            $this->processDelivery($tl, $request->title, $request->message);
+            $this->onlySendEmail($tl, $request->title, $request->message);
         }
 
-        // --- PROSES MUTHAWIFS ---
+        // 4. Looping kirim email ke Muthawif
         foreach ($muthawifs as $mu) {
-            $this->processDelivery($mu, $request->title, $request->message);
+            $this->onlySendEmail($mu, $request->title, $request->message);
         }
 
-        // --- KIRIM FCM BROADCAST (Popup HP) ---
-        $this->sendFcmBroadcast($request->title, $request->message);
+        // 5. Kirim Push Notification (Popup HP)
+        $this->sendFcmBroadcast($request->title, $request->message, $notification->id);
 
         return redirect()->route('admin.notifications.index')
             ->with('success', 'Broadcast berhasil dikirim ke semua TL & Muthawif!');
     }
 
     /**
-     * Helper Fungsi untuk Simpan DB + Kirim Email
+     * Hapus Riwayat Notifikasi
      */
-    private function processDelivery($user, $title, $message)
+    public function destroy($id)
     {
-        // 1️⃣ Simpan ke Database (Biar muncul di list APK)
-        // Pastikan tabel notifications punya kolom user_id yang fleksibel atau
-        // disesuaikan dengan logic auth di APK lu
-        Notification::create([
-            'user_id'   => $user->id,
-            'title'     => $title,
-            'message'   => $message,
-            'is_active' => true,
-        ]);
+        try {
+            $notification = Notification::findOrFail($id);
+            $notification->delete();
+            return redirect()->route('admin.notifications.index')
+                ->with('success', 'Notifikasi berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error("Gagal hapus notif ID $id: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus notifikasi.');
+        }
+    }
 
-        // 2️⃣ Kirim Email SMTP
+    /**
+     * Helper: Hanya kirim email (Tanpa simpan DB lagi)
+     */
+    private function onlySendEmail($user, $title, $message)
+    {
         try {
             Mail::to($user->email)->send(new ReportMasukMail(
-                $user->name ?? $user->nama, // Handle beda kolom 'name' vs 'nama'
+                $user->name ?? $user->nama, // Mendukung kolom 'name' (TL) atau 'nama' (Muthawif)
                 $message,
                 $title
             ));
@@ -106,9 +120,9 @@ class NotificationController extends Controller
     }
 
     /**
-     * Helper FCM Broadcast
+     * Helper: FCM Broadcast (V1)
      */
-    private function sendFcmBroadcast($title, $message)
+    private function sendFcmBroadcast($title, $message, $notifId)
     {
         $accessToken = $this->getAccessToken();
         if (!$accessToken) return;
@@ -120,6 +134,7 @@ class NotificationController extends Controller
                     'title' => $title,
                     'body'  => $message,
                     'type'  => 'broadcast',
+                    'notification_id' => (string) $notifId,
                 ],
                 'android' => ['priority' => 'high'],
             ],
@@ -128,7 +143,7 @@ class NotificationController extends Controller
         try {
             $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
             Http::withToken($accessToken)->post($url, $payload);
-            Log::info('FCM Broadcast Berhasil.');
+            Log::info('FCM Broadcast Berhasil dikirim.');
         } catch (\Exception $e) {
             Log::error('FCM Broadcast Gagal: ' . $e->getMessage());
         }
