@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Tourleader;
+use App\Models\TourLeader;
 use App\Models\Kloter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,13 +15,13 @@ class TourLeaderController extends Controller
      */
     public function index()
     {
-        $tourleaders = Tourleader::with('kloter')->get();
+        $tourleaders = TourLeader::with('kloter')->get();
         $kloters = Kloter::all(); // penting untuk modal create
 
         return view('admin.tourleaders.index', compact('tourleaders', 'kloters'));
     }
 
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -48,7 +48,7 @@ class TourLeaderController extends Controller
     /**
      * Edit page (kalau masih pakai halaman terpisah)
      */
-    public function edit(Tourleader $tourleader)
+    public function edit(TourLeader $tourleader)
     {
         $kloters = Kloter::all();
 
@@ -58,7 +58,7 @@ class TourLeaderController extends Controller
     /**
      * Update TourLeader
      */
-    public function update(Request $request, Tourleader $tourleader)
+    public function update(Request $request, TourLeader $tourleader)
     {
         $request->validate([
             'name'      => 'required|string|max:255',
@@ -86,7 +86,7 @@ class TourLeaderController extends Controller
     /**
      * Delete TourLeader
      */
-    public function destroy(Tourleader $tourleader)
+    public function destroy(TourLeader $tourleader)
     {
         $tourleader->delete();
 
