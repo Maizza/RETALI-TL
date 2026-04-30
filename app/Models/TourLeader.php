@@ -5,20 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
 use App\Models\Scan;
 use App\Models\Kloter;
 use App\Models\Task;
+use App\Models\Jamaah;
 
-use Laravel\Sanctum\HasApiTokens;
-
-class TourLeader extends Authenticatable
+class Tourleader extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'tour_leaders';
 
-    protected $fillable = ['name', 'email', 'password', 'fcm_token', 'kloter_id'];
-    protected $hidden = ['password', 'remember_token'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'fcm_token',
+        'kloter_id'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token'
+    ];
+
+    // =========================
+    // RELATIONS
+    // =========================
 
     public function scans()
     {
@@ -32,16 +47,26 @@ class TourLeader extends Authenticatable
 
     public function tasks()
     {
-        return $this->belongsToMany(Task::class, 'task_user', 'tourleader_id', 'task_id')
-                    ->withPivot('done_at')
-                    ->withTimestamps();
+        return $this->belongsToMany(
+            Task::class,
+            'task_user',
+            'tourleader_id',
+            'task_id'
+        )
+        ->withPivot('done_at')
+        ->withTimestamps();
     }
 
     public function checklistTasks()
     {
-        return $this->belongsToMany(\App\Models\ChecklistTask::class, 'checklist_task_user', 'tourleader_id', 'checklist_task_id')
-                    ->withPivot('done_at')
-                    ->withTimestamps();
+        return $this->belongsToMany(
+            \App\Models\ChecklistTask::class,
+            'checklist_task_user',
+            'tourleader_id',
+            'checklist_task_id'
+        )
+        ->withPivot('done_at')
+        ->withTimestamps();
     }
 
     public function itineraries()
@@ -55,8 +80,10 @@ class TourLeader extends Authenticatable
     }
 
     public function jamaah()
-{
-    return $this->belongsToMany(Jamaah::class, 'jamaah_tourleader');
-}
-
+    {
+        return $this->belongsToMany(
+            Jamaah::class,
+            'jamaah_tourleader'
+        );
+    }
 }
