@@ -11,7 +11,7 @@ use App\Models\Task;
 
 use Laravel\Sanctum\HasApiTokens;
 
-class TourLeader extends Authenticatable
+class Tourleader extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
